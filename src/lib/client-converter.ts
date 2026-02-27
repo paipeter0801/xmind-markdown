@@ -101,15 +101,23 @@ class XmindParser {
       const parsed = this.parser.parse(xmlContent);
 
       // Handle different XMind formats
-      if (parsed['xmap-content']) {
-        return parsed['xmap-content'];
+
+      // Standard XMind format: xmap-content -> sheet
+      if (parsed['xmap-content']?.sheet) {
+        return parsed['xmap-content'].sheet;
       }
+
+      // Direct sheet format
       if (parsed.sheet) {
         return parsed.sheet;
       }
+
+      // Multiple sheets format
       if (parsed.sheets && Array.isArray(parsed.sheets.sheet)) {
         return parsed.sheets.sheet[0];
       }
+
+      // Map format
       if (parsed.map) {
         return parsed.map;
       }
