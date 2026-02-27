@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <sheet id="test-sheet" theme="default">
+    <topic id="root">
+      <title>測試主題</title>
+      <children>
+        <topics>
+          <topic id="child1">
+            <title>子主題 1</title>
+          </topic>
+          <topic id="child2">
+            <title>子主題 2</title>
+            <children>
+              <topics>
+                <topic id="grandchild1">
+                  <title>孫主題 1</title>
+                </topic>
+              </topics>
+            </children>
+          </topic>
+          <topic id="child3">
+            <title>子主題 3</title>
+          </topic>
+        </topics>
+      </children>
+    </topic>
+  </sheet>
+</xmap-content>

@@ -21,4 +21,7 @@ import Converter from '../components/converter/Converter.svelte'
       <Converter client:load />
     </main>
   </div>
+
+  <!-- Client-side converter script -->
+  <script is:inline type="module" src="/xmind-markdown/client-converter.js"></script>
 </Layout>
