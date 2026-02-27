@@ -1,11 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro'
+import Converter from '../components/converter/Converter.svelte'
 ---
 
 <Layout title="XMind to Markdown Converter">
   <div class="container mx-auto px-4 py-8 max-w-7xl">
-    <!-- Header -->
-    <header class="text-center mb-12 animate-fade-in">
+    <!-- Hero Section -->
+    <section class="text-center mb-12 animate-fade-in">
       <h1 class="text-5xl font-bold mb-4 bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">
         XMind to Markdown
       </h1>
@@ -13,100 +14,11 @@ import Layout from '../layouts/Layout.astro'
         Convert your XMind files to Markdown format with real-time preview.
         Drag and drop your file to get started.
       </p>
-    </header>
+    </section>
 
     <!-- Main Content -->
     <main class="animate-slide-up">
-      <div class="grid lg:grid-cols-2 gap-6">
-        <!-- Upload Section -->
-        <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 border border-slate-200 dark:border-slate-700">
-          <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
-            <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            Upload XMind File
-          </h2>
-
-          <!-- Drop Zone -->
-          <div id="dropzone" class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-12 text-center hover:border-primary-500 dark:hover:border-primary-500 transition-colors cursor-pointer">
-            <div class="flex flex-col items-center gap-4">
-              <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center">
-                <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-lg font-medium">Drop your XMind file here</p>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">or click to browse</p>
-              </div>
-              <input type="file" id="file-input" accept=".xmind" class="hidden" />
-            </div>
-          </div>
-
-          <!-- File Info -->
-          <div id="file-info" class="hidden mt-6 p-4 bg-slate-100 dark:bg-slate-700/50 rounded-xl">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <p id="file-name" class="font-medium"></p>
-                  <p id="file-size" class="text-sm text-slate-500 dark:text-slate-400"></p>
-                </div>
-              </div>
-              <button id="clear-file" class="p-2 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Preview Section -->
-        <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 border border-slate-200 dark:border-slate-700">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-semibold flex items-center gap-2">
-              <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              Markdown Preview
-            </h2>
-            <button id="export-btn" class="hidden px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Export .md
-            </button>
-          </div>
-
-          <!-- Markdown Content -->
-          <div id="preview-content" class="prose dark:prose-invert max-w-none min-h-[400px] p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
-            <div class="flex items-center justify-center h-64 text-slate-400 dark:text-slate-600">
-              <div class="text-center">
-                <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <p>Upload an XMind file to see the preview</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <Converter client:load />
     </main>
-
-    <!-- Footer -->
-    <footer class="mt-16 text-center text-slate-500 dark:text-slate-400 text-sm">
-      <p>Built with Astro, Svelte, and Tailwind CSS</p>
-    </footer>
   </div>
 </Layout>
-
-<script>
-  // Client-side functionality will be implemented with Svelte components
-  // This is a placeholder for the initial UI
-</script>
