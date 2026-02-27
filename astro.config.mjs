@@ -12,7 +12,9 @@ export default defineConfig({
   ],
   vite: {
     plugins: [
-      tailwindcss(),
+      tailwindcss({
+        darkMode: 'class',
+      }),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['icons/*.png', 'icons/*.svg'],

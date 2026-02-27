@@ -9,13 +9,9 @@ echo "🚀 部署到 GitHub Pages..."
 echo "📦 構建中..."
 npm run build
 
-# 2. 部署到 gh-pages 分支
-echo "📤 部署到 gh-pages 分支..."
-npx gh-pages-add --dist dist
-
-# 3. 推送
-echo "⬆️  推送到 GitHub..."
-git push origin gh-pages
+# 2. 部署到 gh-pages 分支根目錄
+echo "📤 部署到 gh-pages..."
+npx gh-pages -d dist --add
 
 echo "✅ 部署完成！"
-echo "📍 幾分鐘後生效於: https://你的username.github.io/xmind-markdown/"
+echo "📍 幾分鐘後生效於: https://paipeter0801.github.io/xmind-markdown/"

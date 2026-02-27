@@ -1,0 +1,84 @@
+/* Dark mode styles using class strategy */
+@layer utilities {
+  /* Background colors */
+  .dark\:bg-slate-50:where(.dark, .dark *) {
+    background-color: var(--color-slate-50);
+  }
+  .dark\:bg-slate-100:where(.dark, .dark *) {
+    background-color: var(--color-slate-100);
+  }
+  .dark\:bg-slate-200:where(.dark, .dark *) {
+    background-color: var(--color-slate-200);
+  }
+  .dark\:bg-slate-700:where(.dark, .dark *) {
+    background-color: var(--color-slate-700);
+  }
+  .dark\:bg-slate-800:where(.dark, .dark *) {
+    background-color: var(--color-slate-800);
+  }
+  .dark\:bg-slate-900:where(.dark, .dark *) {
+    background-color: var(--color-slate-900);
+  }
+  .dark\:bg-gray-700:where(.dark, .dark *) {
+    background-color: var(--color-gray-700);
+  }
+  .dark\:bg-gray-800:where(.dark, .dark *) {
+    background-color: var(--color-gray-800);
+  }
+  .dark\:bg-gray-900:where(.dark, .dark *) {
+    background-color: var(--color-gray-900);
+  }
+  .dark\:bg-transparent:where(.dark, .dark *) {
+    background-color: transparent;
+  }
+
+  /* Text colors */
+  .dark\:text-slate-100:where(.dark, .dark *) {
+    color: var(--color-slate-100);
+  }
+  .dark\:text-slate-300:where(.dark, .dark *) {
+    color: var(--color-slate-300);
+  }
+  .dark\:text-slate-400:where(.dark, .dark *) {
+    color: var(--color-slate-400);
+  }
+  .dark\:text-slate-500:where(.dark, .dark *) {
+    color: var(--color-slate-500);
+  }
+  .dark\:text-slate-600:where(.dark, .dark *) {
+    color: var(--color-slate-600);
+  }
+
+  /* Border colors */
+  .dark\:border-slate-600:where(.dark, .dark *) {
+    border-color: var(--color-slate-600);
+  }
+  .dark\:border-slate-700:where(.dark, .dark *) {
+    border-color: var(--color-slate-700);
+  }
+  .dark\:border-gray-700:where(.dark, .dark *) {
+    border-color: var(--color-gray-700);
+  }
+  .dark\:border-gray-800:where(.dark, .dark *) {
+    border-color: var(--color-gray-800);
+  }
+  .dark\:border-red-800:where(.dark, .dark *) {
+    border-color: var(--color-red-800);
+  }
+
+  /* Hover states */
+  @media (hover: hover) {
+    .dark\:hover\:bg-slate-600:hover:where(.dark, .dark *) {
+      background-color: var(--color-slate-600);
+    }
+    .dark\:hover\:bg-slate-700:hover:where(.dark, .dark *) {
+      background-color: var(--color-slate-700);
+    }
+    .dark\:hover\:bg-slate-800:hover:where(.dark, .dark *) {
+      background-color: var(--color-slate-800);
+    }
+    .dark\:hover\:bg-gray-800:hover:where(.dark, .dark *) {
+      background-color: var(--color-gray-800);
+    }
+  }
+}
