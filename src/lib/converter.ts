@@ -119,6 +119,7 @@ export class XmindToMarkdownConverter {
 
     // Find content.xml (try various paths)
     const contentPaths = [
+      'content/content.xml',  // Standard XMind format
       'content.xml',
       'src/content.xml',
       'META-INF/content.xml',
