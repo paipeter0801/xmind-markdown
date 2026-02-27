@@ -69,13 +69,13 @@ class XmindParser {
   constructor() {
     this.parser = new XMLParser({
       ignoreAttributes: false,
-      attributeNamePrefix: '@_',
+      attributeNamePrefix: '', // 不使用前綴，直接使用原始屬性名
       textNodeName: '#text',
       ignoreDeclaration: true,
       ignorePiTags: true,
       trimValues: true,
-      parseAttributeValue: true,
-      parseTagValue: true,
+      parseAttributeValue: false, // 關閉以避免問題
+      parseTagValue: false,
       isArray: (name: string) => {
         return [
           'topic',
@@ -83,6 +83,7 @@ class XmindParser {
           'children',
           'marker-ref',
           'marker-refs',
+          'sheet',
           'attachment',
           'hyperlink',
           'label',
@@ -135,7 +136,8 @@ class XmindParser {
     parentId: string | undefined,
     options?: ConversionOptions
   ): XmindTopic {
-    const id = topic['@_id'] || this.generateId();
+    // 支持帶或不帶前綴的 id 屬性
+    const id = topic['id'] || topic['@_id'] || this.generateId();
     const title = this.extractTitle(topic);
 
     // Parse children
@@ -183,7 +185,9 @@ class XmindParser {
         ? topic['marker-refs']['marker-ref']
         : [topic['marker-refs']['marker-ref']];
       for (const ref of markerRefs) {
-        markers.push(`[${ref['@_marker-id'] || 'marker'}]`);
+        // 支持帶或不帶前綴的 marker-id 屬性
+        const markerId = ref['marker-id'] || ref['@_marker-id'] || ref['id'] || 'marker';
+        markers.push(`[${markerId}]`);
       }
     }
     return markers;
@@ -191,8 +195,9 @@ class XmindParser {
 
   private extractLinks(topic: any): Array<{ href: string; type: string; title?: string }> {
     const links: Array<{ href: string; type: string; title?: string }> = [];
-    if (topic['@_href']) {
-      const href = topic['@_href'];
+    // 支持帶或不帶前綴的 href 屬性
+    const href = topic['href'] || topic['@_href'];
+    if (href) {
       let type: 'url' | 'file' | 'topic' = 'url';
       if (href.startsWith('#')) {
         type = 'topic';
@@ -247,7 +252,8 @@ class XmindParser {
         : [topic['xhtml:img']];
 
       for (const img of images) {
-        const src = img['@_src'];
+        // 支持帶或不帶前綴的 src 屬性
+        const src = img['src'] || img['@_src'];
         if (src) {
           attachments.push({
             filename: src.split('/').pop() || 'image',
@@ -524,6 +530,9 @@ function calculateStats(rootTopic: XmindTopic, startTime: number): ConversionSta
 
 // Export for global access
 if (typeof window !== 'undefined') {
+  // 導出 JSZip 到全局，以便內部使用
+  (window as any).JSZip = JSZip;
+
   (window as any).XmindConverter = {
     convertXmindToMarkdown,
   };

@@ -3956,13 +3956,15 @@ var XmindParser = class {
   constructor() {
     this.parser = new XMLParser({
       ignoreAttributes: false,
-      attributeNamePrefix: "@_",
+      attributeNamePrefix: "",
+      // 不使用前綴，直接使用原始屬性名
       textNodeName: "#text",
       ignoreDeclaration: true,
       ignorePiTags: true,
       trimValues: true,
-      parseAttributeValue: true,
-      parseTagValue: true,
+      parseAttributeValue: false,
+      // 關閉以避免問題
+      parseTagValue: false,
       isArray: (name) => {
         return [
           "topic",
@@ -3970,6 +3972,7 @@ var XmindParser = class {
           "children",
           "marker-ref",
           "marker-refs",
+          "sheet",
           "attachment",
           "hyperlink",
           "label",
@@ -4009,7 +4012,7 @@ var XmindParser = class {
     return this.parseTopic(rootTopic, 0, void 0, options);
   }
   parseTopic(topic, level, parentId, options) {
-    const id = topic["@_id"] || this.generateId();
+    const id = topic["id"] || topic["@_id"] || this.generateId();
     const title = this.extractTitle(topic);
     const children = [];
     if (topic.children?.topics && (!options?.maxDepth || level < options.maxDepth)) {
@@ -4047,15 +4050,16 @@ var XmindParser = class {
     if (topic["marker-refs"]?.["marker-ref"]) {
       const markerRefs = Array.isArray(topic["marker-refs"]["marker-ref"]) ? topic["marker-refs"]["marker-ref"] : [topic["marker-refs"]["marker-ref"]];
       for (const ref of markerRefs) {
-        markers.push(`[${ref["@_marker-id"] || "marker"}]`);
+        const markerId = ref["marker-id"] || ref["@_marker-id"] || ref["id"] || "marker";
+        markers.push(`[${markerId}]`);
       }
     }
     return markers;
   }
   extractLinks(topic) {
     const links = [];
-    if (topic["@_href"]) {
-      const href = topic["@_href"];
+    const href = topic["href"] || topic["@_href"];
+    if (href) {
       let type = "url";
       if (href.startsWith("#")) {
         type = "topic";
@@ -4089,7 +4093,7 @@ var XmindParser = class {
     if (topic["xhtml:img"]) {
       const images = Array.isArray(topic["xhtml:img"]) ? topic["xhtml:img"] : [topic["xhtml:img"]];
       for (const img of images) {
-        const src = img["@_src"];
+        const src = img["src"] || img["@_src"];
         if (src) {
           attachments.push({
             filename: src.split("/").pop() || "image",
@@ -4299,6 +4303,7 @@ function calculateStats(rootTopic, startTime) {
   };
 }
 if (typeof window !== "undefined") {
+  window.JSZip = import_jszip.default;
   window.XmindConverter = {
     convertXmindToMarkdown
   };
