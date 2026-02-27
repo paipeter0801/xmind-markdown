@@ -1,34 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
-  :root {
-    --color-bg: 255 255 255;
-    --color-fg: 15 23 42;
-    --color-primary: 14 165 233;
-    --color-primary-fg: 255 255 255;
-  }
-
-  .dark {
-    --color-bg: 15 23 42;
-    --color-fg: 248 250 252;
-  }
-
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-  }
-
   /* Markdown content styles */
-  .prose {
-    @apply max-w-none;
-  }
-
   .prose h1 {
     @apply text-3xl font-bold mt-8 mb-4;
   }
@@ -62,11 +35,11 @@
   }
 
   .prose code {
-    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+    @apply bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono;
   }
 
   .prose pre {
-    @apply bg-muted p-4 rounded-lg overflow-x-auto my-4;
+    @apply bg-slate-100 dark:bg-slate-800 p-4 rounded-lg overflow-x-auto my-4;
   }
 
   .prose pre code {
@@ -74,15 +47,15 @@
   }
 
   .prose a {
-    @apply text-primary hover:underline;
+    @apply text-sky-500 hover:underline;
   }
 
   .prose blockquote {
-    @apply border-l-4 border-primary pl-4 italic my-4;
+    @apply border-l-4 border-sky-500 pl-4 italic my-4;
   }
 
   .prose hr {
-    @apply border-border my-8;
+    @apply border-slate-300 dark:border-slate-700 my-8;
   }
 
   .prose img {
@@ -94,11 +67,11 @@
   }
 
   .prose th, .prose td {
-    @apply border border-border px-4 py-2;
+    @apply border border-slate-300 dark:border-slate-700 px-4 py-2;
   }
 
   .prose th {
-    @apply bg-muted font-semibold;
+    @apply bg-slate-100 dark:bg-slate-800 font-semibold;
   }
 }
 
@@ -110,19 +83,24 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    background-color: rgb(241 245 249);
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background-color: rgb(30 41 59);
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded;
+    background-color: rgb(148 163 184);
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    background-color: rgb(100 116 139);
   }
 
   /* Selection styles */
   ::selection {
-    @apply bg-primary/20;
+    background-color: rgb(14 165 233 / 0.2);
   }
 }

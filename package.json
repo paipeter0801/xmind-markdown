@@ -11,10 +11,17 @@
     "check": "astro check",
     "typecheck": "tsc --noEmit"
   },
-  "keywords": ["xmind", "markdown", "converter", "astro", "svelte"],
+  "keywords": [
+    "xmind",
+    "markdown",
+    "converter",
+    "astro",
+    "svelte"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@astrojs/check": "^0.9.6",
     "@astrojs/svelte": "^7.2.5",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^5.18.0",
