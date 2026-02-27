@@ -5,6 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://astro.build/config
 export default defineConfig({
+  // 部署到 GitHub Pages 子路徑
+  base: '/xmind-markdown',
   integrations: [
     svelte(),
   ],
