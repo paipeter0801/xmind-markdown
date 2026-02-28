@@ -104,12 +104,14 @@ class XmindParser {
 
       // Standard XMind format: xmap-content -> sheet
       if (parsed['xmap-content']?.sheet) {
-        return parsed['xmap-content'].sheet;
+        const sheet = parsed['xmap-content'].sheet;
+        return Array.isArray(sheet) ? sheet[0] : sheet;
       }
 
       // Direct sheet format
       if (parsed.sheet) {
-        return parsed.sheet;
+        const sheet = parsed.sheet;
+        return Array.isArray(sheet) ? sheet[0] : sheet;
       }
 
       // Multiple sheets format
@@ -129,7 +131,12 @@ class XmindParser {
   }
 
   extractTopicTree(content: any, options?: ConversionOptions): XmindTopic {
-    const rootTopic = content.topic;
+    let rootTopic = content.topic;
+
+    // Handle case where topic is an array (due to isArray config)
+    if (Array.isArray(rootTopic)) {
+      rootTopic = rootTopic[0];
+    }
 
     if (!rootTopic) {
       throw new Error('No root topic found in XMind content');
@@ -150,14 +157,38 @@ class XmindParser {
 
     // Parse children
     const children: XmindTopic[] = [];
-    if (topic.children?.topics && (!options?.maxDepth || level < options.maxDepth)) {
-      const childTopics = Array.isArray(topic.children.topics)
-        ? topic.children.topics
-        : [topic.children.topics];
+    if (topic.children && (!options?.maxDepth || level < options.maxDepth)) {
+      // Handle children being an array due to isArray config
+      let childrenArray = Array.isArray(topic.children) ? topic.children : [topic.children];
 
-      for (const childTopic of childTopics) {
-        if (this.isValidTopic(childTopic)) {
-          children.push(this.parseTopic(childTopic, level + 1, id, options));
+      for (const childContainer of childrenArray) {
+        if (childContainer.topics) {
+          let childTopics = Array.isArray(childContainer.topics)
+            ? childContainer.topics
+            : [childContainer.topics];
+
+          // Handle nested arrays due to isArray config including "topics"
+          // topics might be [[{...}, {...}]] instead of [{...}, {...}]
+          if (childTopics.length === 1 && Array.isArray(childTopics[0])) {
+            childTopics = childTopics[0];
+          }
+
+          for (const childTopicContainer of childTopics) {
+            // Handle case where the element is {topic: [...], type: "attached"}
+            // Extract the actual topic array
+            if (childTopicContainer.topic && !childTopicContainer.id) {
+              const topicArray = Array.isArray(childTopicContainer.topic)
+                ? childTopicContainer.topic
+                : [childTopicContainer.topic];
+              for (const t of topicArray) {
+                if (this.isValidTopic(t)) {
+                  children.push(this.parseTopic(t, level + 1, id, options));
+                }
+              }
+            } else if (this.isValidTopic(childTopicContainer)) {
+              children.push(this.parseTopic(childTopicContainer, level + 1, id, options));
+            }
+          }
         }
       }
     }
@@ -178,7 +209,13 @@ class XmindParser {
 
   private extractTitle(topic: any): string {
     if (topic.title) {
-      return topic.title;
+      // Handle both string and {#text: "..."} formats
+      if (typeof topic.title === 'string') {
+        return topic.title;
+      }
+      if (topic.title['#text']) {
+        return String(topic.title['#text']);
+      }
     }
     if (topic['#text']) {
       return String(topic['#text']);

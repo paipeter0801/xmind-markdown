@@ -5,7 +5,8 @@
   "description": "XMind to Markdown converter with real-time preview",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build:client": "npx esbuild src/lib/client-converter.ts --bundle --format=esm --outfile=public/client-converter.js --sourcemap --minify",
+    "build": "npm run build:client && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
