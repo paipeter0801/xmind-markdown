@@ -1,13 +1,15 @@
+#!/usr/bin/env node
 /**
- * Client-side XMind to Markdown Converter
- * This module bundles all conversion logic for browser use
+ * 本地测试 XMind 转换
+ * 使用与浏览器相同的 client-converter.ts 代码
  */
 
-import JSZip from 'jszip';
 import { XMLParser } from 'fast-xml-parser';
+import JSZip from 'jszip';
+import fs from 'fs';
 
 // Marker to emoji mapping (matches Python version)
-const MARKER_MAP: Record<string, string> = {
+const MARKER_MAP = {
   // Priority markers
   'priority-1': '🔴',
   'priority-2': '🟠',
@@ -45,66 +47,8 @@ const MARKER_MAP: Record<string, string> = {
   'progress-5': '🟩🟩🟩🟩🟩',
 };
 
-// Types
-export interface XmindTopic {
-  id: string;
-  title: string;
-  level: number;
-  parentId?: string;
-  children?: XmindTopic[];
-  markers?: string[];
-  links?: Array<{ href: string; type: string; title?: string }>;
-  notes?: string;
-  labels?: string[];
-  attachments?: Array<{
-    filename: string;
-    mimeType: string;
-    size: number;
-    path: string;
-    type: string;
-  }>;
-}
-
-export interface ConversionResult {
-  content: string;
-  stats: ConversionStats;
-  metadata: ConversionMetadata;
-  success: boolean;
-  error?: string;
-}
-
-export interface ConversionStats {
-  totalTopics: number;
-  maxDepthReached: number;
-  rootTopics: number;
-  processingTime: number;
-  markersProcessed: number;
-  attachmentsProcessed: number;
-  linksProcessed: number;
-  imagesProcessed: number;
-}
-
-export interface ConversionMetadata {
-  sourceFile: string;
-  sourceFormat: string;
-  timestamp: Date;
-  version: string;
-}
-
-export interface ConversionOptions {
-  outputFormat?: 'markdown' | 'html' | 'json';
-  includeMetadata?: boolean;
-  includeIds?: boolean;
-  includeTimestamps?: boolean;
-  skipEmpty?: boolean;
-  preserveFormatting?: boolean;
-  maxDepth?: number;
-}
-
-// Parser class
+// 从 client-converter.ts 复制的解析器类
 class XmindParser {
-  private parser: XMLParser;
-
   constructor() {
     this.parser = new XMLParser({
       ignoreAttributes: false,
@@ -115,7 +59,7 @@ class XmindParser {
       trimValues: true,
       parseAttributeValue: false, // 關閉以避免問題
       parseTagValue: false,
-      isArray: (name: string) => {
+      isArray: (name) => {
         return [
           'topic',
           'topics',
@@ -135,11 +79,9 @@ class XmindParser {
     });
   }
 
-  parseXML(xmlContent: string): any {
+  parseXML(xmlContent) {
     try {
       const parsed = this.parser.parse(xmlContent);
-
-      // Handle different XMind formats
 
       // Standard XMind format: xmap-content -> sheet
       if (parsed['xmap-content']?.sheet) {
@@ -165,11 +107,11 @@ class XmindParser {
 
       return parsed;
     } catch (error) {
-      throw new Error(`Failed to parse XML: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(`Failed to parse XML: ${error.message}`);
     }
   }
 
-  extractTopicTree(content: any, options?: ConversionOptions): XmindTopic {
+  extractTopicTree(content) {
     let rootTopic = content.topic;
 
     // Handle case where topic is an array (due to isArray config)
@@ -181,23 +123,16 @@ class XmindParser {
       throw new Error('No root topic found in XMind content');
     }
 
-    return this.parseTopic(rootTopic, 0, undefined, options);
+    return this.parseTopic(rootTopic, 0, undefined);
   }
 
-  private parseTopic(
-    topic: any,
-    level: number,
-    parentId: string | undefined,
-    options?: ConversionOptions
-  ): XmindTopic {
-    // 支持帶或不帶前綴的 id 屬性
+  parseTopic(topic, level, parentId) {
     const id = topic['id'] || topic['@_id'] || this.generateId();
     const title = this.extractTitle(topic);
 
     // Parse children
-    const children: XmindTopic[] = [];
-    if (topic.children && (!options?.maxDepth || level < options.maxDepth)) {
-      // Handle children being an array due to isArray config
+    const children = [];
+    if (topic.children) {
       let childrenArray = Array.isArray(topic.children) ? topic.children : [topic.children];
 
       for (const childContainer of childrenArray) {
@@ -207,25 +142,23 @@ class XmindParser {
             : [childContainer.topics];
 
           // Handle nested arrays due to isArray config including "topics"
-          // topics might be [[{...}, {...}]] instead of [{...}, {...}]
           if (childTopics.length === 1 && Array.isArray(childTopics[0])) {
             childTopics = childTopics[0];
           }
 
           for (const childTopicContainer of childTopics) {
             // Handle case where the element is {topic: [...], type: "attached"}
-            // Extract the actual topic array
             if (childTopicContainer.topic && !childTopicContainer.id) {
               const topicArray = Array.isArray(childTopicContainer.topic)
                 ? childTopicContainer.topic
                 : [childTopicContainer.topic];
               for (const t of topicArray) {
                 if (this.isValidTopic(t)) {
-                  children.push(this.parseTopic(t, level + 1, id, options));
+                  children.push(this.parseTopic(t, level + 1, id));
                 }
               }
             } else if (this.isValidTopic(childTopicContainer)) {
-              children.push(this.parseTopic(childTopicContainer, level + 1, id, options));
+              children.push(this.parseTopic(childTopicContainer, level + 1, id));
             }
           }
         }
@@ -246,7 +179,7 @@ class XmindParser {
     };
   }
 
-  private extractTitle(topic: any): string {
+  extractTitle(topic) {
     if (topic.title) {
       // Handle both string and {#text: "..."} formats
       if (typeof topic.title === 'string') {
@@ -262,8 +195,8 @@ class XmindParser {
     return 'Untitled Topic';
   }
 
-  private extractMarkers(topic: any): string[] {
-    const markers: string[] = [];
+  extractMarkers(topic) {
+    const markers = [];
     if (topic['marker-refs']?.['marker-ref']) {
       const markerRefs = Array.isArray(topic['marker-refs']['marker-ref'])
         ? topic['marker-refs']['marker-ref']
@@ -281,12 +214,11 @@ class XmindParser {
     return markers;
   }
 
-  private extractLinks(topic: any): Array<{ href: string; type: string; title?: string }> {
-    const links: Array<{ href: string; type: string; title?: string }> = [];
-    // 支持帶或不帶前綴的 href 屬性
+  extractLinks(topic) {
+    const links = [];
     const href = topic['href'] || topic['@_href'];
     if (href) {
-      let type: 'url' | 'file' | 'topic' = 'url';
+      let type = 'url';
       if (href.startsWith('#')) {
         type = 'topic';
       } else if (href.startsWith('file://') || href.startsWith('./')) {
@@ -297,15 +229,15 @@ class XmindParser {
     return links;
   }
 
-  private extractNotes(topic: any): string | undefined {
+  extractNotes(topic) {
     if (topic.notes?.['plain-text']) {
       return topic.notes['plain-text'];
     }
     return undefined;
   }
 
-  private extractLabels(topic: any): string[] {
-    const labels: string[] = [];
+  extractLabels(topic) {
+    const labels = [];
     if (topic.labels?.label) {
       const labelArray = Array.isArray(topic.labels.label)
         ? topic.labels.label
@@ -319,28 +251,13 @@ class XmindParser {
     return labels;
   }
 
-  private extractAttachments(topic: any): Array<{
-    filename: string;
-    mimeType: string;
-    size: number;
-    path: string;
-    type: string;
-  }> {
-    const attachments: Array<{
-      filename: string;
-      mimeType: string;
-      size: number;
-      path: string;
-      type: string;
-    }> = [];
-
+  extractAttachments(topic) {
+    const attachments = [];
     if (topic['xhtml:img']) {
       const images = Array.isArray(topic['xhtml:img'])
         ? topic['xhtml:img']
         : [topic['xhtml:img']];
-
       for (const img of images) {
-        // 支持帶或不帶前綴的 src 屬性
         const src = img['src'] || img['@_src'];
         if (src) {
           attachments.push({
@@ -353,118 +270,23 @@ class XmindParser {
         }
       }
     }
-
     return attachments;
   }
 
-  private isValidTopic(topic: any): boolean {
+  isValidTopic(topic) {
     if (Array.isArray(topic)) {
       return topic.length > 0;
     }
     return true;
   }
 
-  private generateId(): string {
+  generateId() {
     return `topic-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }
 
-// Main converter function
-export async function convertXmindToMarkdown(
-  file: File | ArrayBuffer,
-  fileName?: string,
-  options?: ConversionOptions
-): Promise<ConversionResult> {
-  const startTime = performance.now();
-  const opts = {
-    includeMetadata: true,
-    includeIds: false,
-    includeTimestamps: false,
-    skipEmpty: true,
-    preserveFormatting: true,
-    ...options,
-  };
-
-  try {
-    // Extract content from XMind file (ZIP archive)
-    const xmlContent = await extractXmindContent(file);
-
-    // Parse XML to topic tree
-    const parser = new XmindParser();
-    const rootTopic = parser.extractTopicTree(parser.parseXML(xmlContent), opts);
-
-    // Convert topic tree to markdown
-    const markdown = topicTreeToMarkdown(rootTopic, opts);
-
-    // Calculate statistics
-    const stats = calculateStats(rootTopic, startTime);
-
-    // Build metadata
-    const metadata = {
-      sourceFile: fileName || 'unknown.xmind',
-      sourceFormat: 'xmind',
-      timestamp: new Date(),
-      version: '1.0.0',
-    };
-
-    return {
-      content: markdown,
-      stats,
-      metadata,
-      success: true,
-    };
-  } catch (error) {
-    return {
-      content: '',
-      stats: {
-        totalTopics: 0,
-        maxDepthReached: 0,
-        rootTopics: 0,
-        processingTime: performance.now() - startTime,
-        markersProcessed: 0,
-        attachmentsProcessed: 0,
-        linksProcessed: 0,
-        imagesProcessed: 0,
-      },
-      metadata: {
-        sourceFile: fileName || 'unknown',
-        sourceFormat: 'xmind',
-        timestamp: new Date(),
-        version: '1.0.0',
-      },
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred',
-    };
-  }
-}
-
-async function extractXmindContent(file: File | ArrayBuffer): Promise<string> {
-  let arrayBuffer: ArrayBuffer;
-
-  if (file instanceof File) {
-    arrayBuffer = await file.arrayBuffer();
-  } else {
-    arrayBuffer = file;
-  }
-
-  // Load ZIP archive
-  const zip = await JSZip.loadAsync(arrayBuffer);
-
-  // Find content.xml (try various paths)
-  const contentPaths = ['content.xml', 'src/content.xml', 'META-INF/content.xml', 'content/content.xml'];
-
-  for (const path of contentPaths) {
-    const contentFile = zip.file(path);
-    if (contentFile) {
-      return await contentFile.async('string');
-    }
-  }
-
-  throw new Error('Could not find content.xml in XMind file');
-}
-
-function topicTreeToMarkdown(rootTopic: XmindTopic, options: ConversionOptions): string {
-  const lines: string[] = [];
+function topicTreeToMarkdown(rootTopic) {
+  const lines = [];
 
   // Root level processing starts from depth 1
   const rootText = sanitizeTitle(rootTopic.title);
@@ -472,27 +294,17 @@ function topicTreeToMarkdown(rootTopic: XmindTopic, options: ConversionOptions):
   lines.push(`# ${rootEmoji}${rootText}`);
   lines.push('');
 
-  // Add metadata if requested
-  if (options.includeMetadata) {
-    lines.push('<!--');
-    lines.push(`Generated: ${new Date().toISOString()}`);
-    lines.push(`Topics: ${countTopics(rootTopic)}`);
-    lines.push(`Max Depth: ${getMaxDepth(rootTopic)}`);
-    lines.push('-->');
-    lines.push('');
-  }
-
   // Convert children recursively (start at depth 2)
   if (rootTopic.children && rootTopic.children.length > 0) {
     for (const child of rootTopic.children) {
-      convertTopic(child, lines, 2, options);
+      convertTopic(child, lines, 2);
     }
   }
 
   return lines.join('\n');
 }
 
-function convertTopic(topic: XmindTopic, lines: string[], depth: number, options: ConversionOptions): void {
+function convertTopic(topic, lines, depth) {
   const text = sanitizeTitle(topic.title);
   const emoji = topic.markers?.[0] ? `${topic.markers[0]} ` : '';
   const hasChildren = topic.children && topic.children.length > 0;
@@ -522,15 +334,22 @@ function convertTopic(topic: XmindTopic, lines: string[], depth: number, options
     }
   }
 
+  // Add notes if present
+  if (topic.notes) {
+    lines.push('');
+    lines.push(`> ${topic.notes}`);
+    lines.push('');
+  }
+
   // Recursively process children
-  if (hasChildren) {
+  if (topic.children && topic.children.length > 0) {
     for (const child of topic.children) {
-      convertTopic(child, lines, depth + 1, options);
+      convertTopic(child, lines, depth + 1);
     }
   }
 }
 
-function sanitizeTitle(title: string): string {
+function sanitizeTitle(title) {
   let sanitized = title.trim().replace(/\s+/g, ' ');
   sanitized = sanitized
     .replace(/</g, '&lt;')
@@ -538,15 +357,7 @@ function sanitizeTitle(title: string): string {
   return sanitized;
 }
 
-function notesToBlockquote(notes: string): string {
-  return notes
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0)
-    .join('\n> ');
-}
-
-function countTopics(topic: XmindTopic): number {
+function countTopics(topic) {
   let count = 1;
   if (topic.children) {
     for (const child of topic.children) {
@@ -556,7 +367,7 @@ function countTopics(topic: XmindTopic): number {
   return count;
 }
 
-function getMaxDepth(topic: XmindTopic): number {
+function getMaxDepth(topic) {
   if (!topic.children || topic.children.length === 0) {
     return topic.level;
   }
@@ -564,51 +375,64 @@ function getMaxDepth(topic: XmindTopic): number {
   return Math.max(...childDepths);
 }
 
-function calculateStats(rootTopic: XmindTopic, startTime: number): ConversionStats {
-  let totalTopics = 0;
-  let maxDepth = 0;
-  let markersProcessed = 0;
-  let attachmentsProcessed = 0;
-  let linksProcessed = 0;
-  let imagesProcessed = 0;
+// Main conversion function
+async function convertXmindToMarkdown(filePath) {
+  const fileBuffer = fs.readFileSync(filePath);
+  const zip = await JSZip.loadAsync(fileBuffer);
 
-  function traverse(topic: XmindTopic) {
-    totalTopics++;
-    maxDepth = Math.max(maxDepth, topic.level);
-    if (topic.markers) markersProcessed += topic.markers.length;
-    if (topic.attachments) {
-      attachmentsProcessed += topic.attachments.length;
-      imagesProcessed += topic.attachments.filter((a) => a.type === 'image').length;
-    }
-    if (topic.links) linksProcessed += topic.links.length;
-
-    if (topic.children) {
-      for (const child of topic.children) {
-        traverse(child);
-      }
-    }
+  // Find content.xml
+  const contentPaths = ['content.xml', 'src/content.xml', 'META-INF/content.xml', 'content/content.xml'];
+  let contentFile = null;
+  for (const path of contentPaths) {
+    contentFile = zip.file(path);
+    if (contentFile) break;
   }
 
-  traverse(rootTopic);
+  if (!contentFile) {
+    throw new Error('Could not find content.xml in XMind file');
+  }
+
+  const xmlContent = await contentFile.async('string');
+
+  // Parse XML to topic tree
+  const parser = new XmindParser();
+  const rootTopic = parser.extractTopicTree(parser.parseXML(xmlContent));
+
+  // Convert topic tree to markdown
+  const markdown = topicTreeToMarkdown(rootTopic);
 
   return {
-    totalTopics,
-    maxDepthReached: maxDepth,
-    rootTopics: rootTopic.children?.length || 0,
-    processingTime: performance.now() - startTime,
-    markersProcessed,
-    attachmentsProcessed,
-    linksProcessed,
-    imagesProcessed,
+    success: true,
+    content: markdown,
+    stats: {
+      totalTopics: countTopics(rootTopic),
+      maxDepthReached: getMaxDepth(rootTopic),
+      rootTopics: rootTopic.children?.length || 0,
+    },
   };
 }
 
-// Export for global access
-if (typeof window !== 'undefined') {
-  // 導出 JSZip 到全局，以便內部使用
-  (window as any).JSZip = JSZip;
+// Run test
+const args = process.argv.slice(2);
+if (args.length === 0) {
+  console.log('Usage: node test-local.mjs <xmind-file>');
+  process.exit(1);
+}
 
-  (window as any).XmindConverter = {
-    convertXmindToMarkdown,
-  };
+const xmindFile = args[0];
+console.log(`📂 Processing: ${xmindFile}`);
+
+try {
+  const result = await convertXmindToMarkdown(xmindFile);
+
+  console.log('\n✅ Conversion successful!');
+  console.log(`📊 Stats: ${result.stats.totalTopics} topics, max depth: ${result.stats.maxDepthReached}`);
+  console.log('\n📄 Markdown output:');
+  console.log('---');
+  console.log(result.content);
+  console.log('---');
+} catch (error) {
+  console.error('\n❌ Error:', error.message);
+  console.error(error.stack);
+  process.exit(1);
 }
