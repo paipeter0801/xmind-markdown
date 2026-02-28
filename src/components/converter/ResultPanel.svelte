@@ -154,7 +154,18 @@
 	{/if}
 
 	<!-- Content Area -->
-	<div class="prose dark:prose-invert max-w-none min-h-[400px] p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 overflow-auto">
+	<div class="prose prose-slate max-w-none min-h-[400px] p-4 rounded-xl border overflow-auto
+		bg-slate-50 border-slate-200
+		dark:bg-slate-900/50 dark:border-slate-700
+		text-slate-900 dark:text-slate-100
+		prose-headings:font-semibold prose-headings:text-slate-900 dark:prose-headings:text-slate-100
+		prose-p:text-slate-700 dark:prose-p:text-slate-300
+		prose-li:text-slate-700 dark:prose-li:text-slate-300
+		prose-strong:text-slate-900 dark:prose-strong:text-slate-100
+		prose-code:text-pink-600 dark:prose-code:text-pink-400
+		prose-links:text-blue-600 dark:prose-links:text-blue-400
+		prose-a:text-blue-600 hover:prose-a:text-blue-700
+		dark:prose-a:text-blue-400 dark:hover:prose-a:text-blue-300">
 		{#if isLoading}
 			<div class="flex items-center justify-center h-64">
 				<div class="text-center">
