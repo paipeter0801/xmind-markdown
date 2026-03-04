@@ -77,7 +77,8 @@
 			} else if (line.match(/`(.*?)`/)) {
 				result.push(line.replace(/`(.*?)`/gim, '<code>$1</code>'));
 			} else if (line === '') {
-				result.push('<br />');
+				// 空行保持為空行（不添加 <br />）
+				result.push('');
 			} else {
 				result.push(line);
 			}
