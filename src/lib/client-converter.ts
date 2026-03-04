@@ -520,13 +520,9 @@ function convertTopic(topic: XmindTopic, lines: string[], depth: number, options
   } else {
     // depth 5+ - list format
     const indent = '  '.repeat(depth - 5);
-    if (hasChildren) {
-      const cleanText = text.replace(/：$/g, '');
-      lines.push(`${indent}- ${emoji}${cleanText}:`);
-    } else {
-      const cleanText = text.replace(/：$/g, '');
-      lines.push(`${indent}- ${emoji}${cleanText}`);
-    }
+    // 將結尾的中文冒號替換為英文冒號（如果有）
+    const cleanText = text.replace(/：$/g, ':');
+    lines.push(`${indent}- ${emoji}${cleanText}`);
   }
 
   // Recursively process children
