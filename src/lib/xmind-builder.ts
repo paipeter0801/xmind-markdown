@@ -58,12 +58,12 @@ export class XmindBuilder {
     }
 
     // Assemble complete XMind XML with full attributes
-    return `<?xml version="1.0" encoding="UTF-8"?>
+    return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" modified-by="${this.options.author}" timestamp="${this.currentTimestamp}" version="2.0">
   <sheet id="${sheetId}" theme="${this.options.theme}" modified-by="${this.options.author}" timestamp="${this.currentTimestamp}">
-    <topic id="${rootTopicId}" ${this.buildTopicAttributes()}>
+    <topic id="${rootTopicId}" ${this.buildTopicAttributes()} structure-class="org.xmind.ui.logic.right">
       ${rootTopicContent}
-      ${childrenXml ? `<topics type="attached">${childrenXml}</topics>` : ''}
+      ${childrenXml ? `<children><topics type="attached">${childrenXml}</topics></children>` : ''}
     </topic>
   </sheet>
 </xmap-content>`;
@@ -131,11 +131,11 @@ export class XmindBuilder {
     // Add title/content
     xml += this.buildTopicContent(node, topicId);
 
-    // Add children if present
+    // Add children if present (wrapped in <children> tag)
     if (node.children && node.children.length > 0) {
       const filteredChildren = node.children.filter(c => !this.shouldSkip(c));
       if (filteredChildren.length > 0) {
-        xml += `<topics type="attached">${this.buildChildren(filteredChildren)}</topics>`;
+        xml += `<children><topics type="attached">${this.buildChildren(filteredChildren)}</topics></children>`;
       }
     }
 
