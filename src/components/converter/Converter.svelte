@@ -3,6 +3,7 @@
 	import Card from '../ui/Card.svelte';
 	import ResultPanel from './ResultPanel.svelte';
 	import ProgressBar from './ProgressBar.svelte';
+	import TableOfContents from './TableOfContents.svelte';
 	import type { ConversionResult } from '../../types/converter';
 
 	// Type for global converter
@@ -280,15 +281,27 @@
 		</div>
 	{/if}
 
-	<!-- Result Panel -->
+	<!-- Result Panel with TOC -->
 	{#if result}
-		<ResultPanel
-			content={htmlContent}
-			stats={result.stats}
-			sourceFile={result.metadata.sourceFile}
-			isLoading={isConverting}
-			onExport={handleExport}
-			onCopy={handleCopy}
-		/>
+		<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+			<!-- Main Content -->
+			<div class="lg:col-span-3">
+				<ResultPanel
+					content={htmlContent}
+					stats={result.stats}
+					sourceFile={result.metadata.sourceFile}
+					isLoading={isConverting}
+					onExport={handleExport}
+					onCopy={handleCopy}
+				/>
+			</div>
+
+			<!-- Table of Contents -->
+			<div class="lg:col-span-1">
+				<div class="sticky top-6">
+					<TableOfContents htmlContent={htmlContent} />
+				</div>
+			</div>
+		</div>
 	{/if}
 </div>
