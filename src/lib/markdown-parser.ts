@@ -53,6 +53,8 @@ export class MarkdownParser {
         // Parse links from root content
         this.parseLinks(root);
         root.content = this.extractLinks(root.content);
+        // Clean markdown formatting
+        root.content = this.cleanMarkdown(root.content);
         startIndex = i + 1;
         break;
       }
@@ -93,6 +95,8 @@ export class MarkdownParser {
         // Extract links from content
         this.parseLinks(node);
         node.content = this.extractLinks(node.content);
+        // Clean markdown formatting
+        node.content = this.cleanMarkdown(node.content);
 
         // Find correct parent
         while (stack.length > 1 && (stack[stack.length - 1].level ?? 0) >= level) {
@@ -119,6 +123,8 @@ export class MarkdownParser {
         // Extract links
         this.parseLinks(node);
         node.content = this.extractLinks(node.content);
+        // Clean markdown formatting
+        node.content = this.cleanMarkdown(node.content);
 
         // Add to current heading or root
         const parent = stack[stack.length - 1];
@@ -156,6 +162,25 @@ export class MarkdownParser {
    */
   private extractLinks(content: string): string {
     return content.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  }
+
+  /**
+   * Remove markdown formatting markers from content
+   * @param content - Content with potential markdown formatting
+   * @returns Clean content without formatting markers
+   */
+  private cleanMarkdown(content: string): string {
+    return content
+      // Remove bold markers (** or __)
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/__([^_]+)__/g, '$1')
+      // Remove italic markers (* or _)
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/_([^_]+)_/g, '$1')
+      // Remove strikethrough markers (~~)
+      .replace(/~~([^~]+)~~/g, '$1')
+      // Remove code markers (`)
+      .replace(/`([^`]+)`/g, '$1');
   }
 }
 

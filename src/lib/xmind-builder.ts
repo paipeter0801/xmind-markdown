@@ -91,11 +91,6 @@ export class XmindBuilder {
       xml += `<xhtml:link xlink:href="${this.escapeXml(link.url)}"/>`;
     }
 
-    // Add marker-refs for list items (visual markers)
-    if (node.type === 'list') {
-      xml += `<marker-refs><marker-ref marker-id="flag-blue"/></marker-refs>`;
-    }
-
     return xml;
   }
 
