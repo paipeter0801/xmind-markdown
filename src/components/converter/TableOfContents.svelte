@@ -15,7 +15,15 @@
 		maxDepth?: number; // 最大顯示層數，預設 5
 	}
 
-	let { htmlContent, class: className, maxDepth = 5 }: Props = $props();
+	let { htmlContent, class: className, maxDepth: maxDepthProp = 5 }: Props = $props();
+
+	// 將 prop 轉換為響應式狀態
+	let maxDepth = $state(maxDepthProp);
+
+	// 當 prop 改變時更新狀態
+	$effect(() => {
+		maxDepth = maxDepthProp;
+	});
 
 	let tocTree = $state<TocItem[]>([]);
 	let expandedItems = $state<Set<string>>(new Set());
@@ -106,18 +114,18 @@
 		return result;
 	}
 
-	// 根據 maxDepth 過濾樹狀結構
-	function filterTreeByDepth(items: TocItem[], currentDepth = 2): TocItem[] {
-		return items
-			.filter(item => item.level <= maxDepth)
-			.map(item => ({
-				...item,
-				children: item.children ? filterTreeByDepth(item.children, item.level + 1) : []
-			}));
-	}
-
-	// 計算顯示用的樹（已過濾）
-	let displayTree = $derived<TocItem[]>(filterTreeByDepth(tocTree));
+	// 根據 maxDepth 過濾樹狀結構（內聯以確保響應式追蹤）
+	let displayTree = $derived<TocItem[]>( (() => {
+		function filter(items: TocItem[]): TocItem[] {
+			return items
+				.filter(item => item.level <= maxDepth)
+				.map(item => ({
+					...item,
+					children: item.children ? filter(item.children) : []
+				}));
+		}
+		return filter(tocTree);
+	})() );
 
 	// Handle click on TOC item
 	function handleItemClick(item: TocItem, event: MouseEvent) {

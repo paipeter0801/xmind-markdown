@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/xmind-markdown/sw.js', { scope: '/xmind-markdown/' })})}
