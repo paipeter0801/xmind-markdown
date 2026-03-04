@@ -160,7 +160,7 @@
 		text-slate-900 dark:text-slate-100
 		prose-headings:font-semibold prose-headings:text-slate-900 dark:prose-headings:text-slate-100
 		prose-p:text-slate-700 dark:prose-p:text-slate-300
-		prose-li:text-slate-700 dark:prose-li:text-slate-300
+		prose-li:text-slate-700 dark:prose-li:text-slate-300 prose-li:text-base
 		prose-strong:text-slate-900 dark:prose-strong:text-slate-100
 		prose-code:text-pink-600 dark:prose-code:text-pink-400
 		prose-links:text-blue-600 dark:prose-links:text-blue-400
