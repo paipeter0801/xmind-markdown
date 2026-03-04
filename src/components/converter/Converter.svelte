@@ -140,6 +140,7 @@
 	let htmlContent = $derived(result && result.success && result.content ? markdownToHtml(result.content) : '');
 	let errorMessage = $state<string | null>(null);
 	let tocMaxDepth = $state(5); // 預設顯示 5 層目錄
+	let showToc = $state(true); // 是否顯示目錄
 
 	async function handleFileSelect(files: File[]) {
 		if (files.length === 0) return;
@@ -251,54 +252,41 @@
 				<DropZone onFileSelect={handleFileSelect} />
 			</Card>
 		{:else}
-			<!-- File Info Card -->
-			<Card>
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-3">
-						<div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
-							<svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-								/>
-							</svg>
-						</div>
-						<div>
-							<p class="font-medium text-slate-900 dark:text-slate-100">
-								{selectedFile.name}
-							</p>
-							<p class="text-sm text-slate-500 dark:text-slate-400">
-								{(selectedFile.size / 1024).toFixed(2)} KB
-							</p>
-						</div>
-					</div>
-					<div class="flex items-center gap-2">
-						{#if isConverting}
-							<div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-								<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500"></div>
-								Converting...
-							</div>
-						{/if}
-						<button
-							onclick={handleClearFile}
-							class="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 dark:text-slate-400"
-							aria-label="Clear file"
-						>
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-							</svg>
-						</button>
+			<!-- Compact File Info Bar -->
+			<div class="bg-white dark:bg-slate-800 rounded-xl px-4 py-2 flex items-center justify-between border border-slate-200 dark:border-slate-700">
+				<div class="flex items-center gap-3 min-w-0">
+					<svg class="w-5 h-5 text-primary-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+					</svg>
+					<div class="min-w-0">
+						<p class="font-medium text-slate-900 dark:text-slate-100 truncate text-sm">
+							{selectedFile.name}
+						</p>
 					</div>
 				</div>
+				<div class="flex items-center gap-2">
+					{#if isConverting}
+						<div class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+							<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-500"></div>
+						</div>
+					{/if}
+					<button
+						onclick={handleClearFile}
+						class="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 dark:text-slate-400 flex-shrink-0"
+						aria-label="Clear file"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+			</div>
 
-				{#if isConverting}
-					<div class="mt-4">
-						<ProgressBar progress={conversionProgress} label="Converting..." />
-					</div>
-				{/if}
-			</Card>
+			{#if isConverting}
+				<div class="mt-3">
+					<ProgressBar progress={conversionProgress} label="Converting..." />
+				</div>
+			{/if}
 		{/if}
 	</section>
 
@@ -319,42 +307,71 @@
 
 	<!-- Result Panel with TOC -->
 	{#if result}
-		<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-			<!-- Main Content -->
-			<div class="lg:col-span-3">
-				<ResultPanel
-					content={htmlContent}
-					stats={result.stats}
-					sourceFile={result.metadata.sourceFile}
-					isLoading={isConverting}
-					onExport={handleExport}
-					onCopy={handleCopy}
-				/>
+		<div class="space-y-4">
+			<!-- Control Bar -->
+			<div class="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl px-4 py-2 border border-slate-200 dark:border-slate-700">
+				<div class="flex items-center gap-2">
+					<svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7" />
+					</svg>
+					<span class="font-semibold text-slate-900 dark:text-slate-100">Markdown Preview</span>
+				</div>
+				<div class="flex items-center gap-4">
+					<!-- TOC Toggle -->
+					<button
+						onclick={() => showToc = !showToc}
+						class="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+					>
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+						</svg>
+						<span>目錄</span>
+						<div class="relative inline-flex h-5 w-8 items-center rounded-full bg-slate-200 dark:bg-slate-700 transition-colors">
+							<div
+								class="inline-block h-3 w-3 transform rounded-full bg-white dark:bg-slate-900 transition-transform {showToc ? 'translate-x-5' : 'translate-x-0.5'}"
+							></div>
+						</div>
+					</button>
+					<!-- Depth Control -->
+					{#if showToc}
+						<div class="flex items-center gap-2 text-sm">
+							<span class="text-slate-600 dark:text-slate-400">層數</span>
+							<span class="font-semibold text-primary-600 dark:text-primary-400 w-5 text-center">{tocMaxDepth}</span>
+							<input
+								type="range"
+								min="2"
+								max="10"
+								bind:value={tocMaxDepth}
+								class="w-20 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+							/>
+						</div>
+					{/if}
+				</div>
 			</div>
 
-			<!-- Table of Contents -->
-			<div class="lg:col-span-1">
-				<div class="sticky top-6 space-y-4">
-					<!-- Depth Control -->
-					<div class="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
-						<label class="flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-							<span>目錄層數</span>
-							<span class="text-primary-600 dark:text-primary-400">{tocMaxDepth}</span>
-						</label>
-						<input
-							type="range"
-							min="2"
-							max="10"
-							bind:value={tocMaxDepth}
-							class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
-						/>
-						<div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
-							<span>2</span>
-							<span>10</span>
+			<!-- Content Grid -->
+			<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+				<!-- Main Content -->
+				<div class={showToc ? 'lg:col-span-3' : 'lg:col-span-4'}>
+					<ResultPanel
+						content={htmlContent}
+						stats={result.stats}
+						sourceFile={result.metadata.sourceFile}
+						isLoading={isConverting}
+						onExport={handleExport}
+						onCopy={handleCopy}
+					/>
+				</div>
+
+				<!-- Table of Contents -->
+				{#if showToc}
+					<div class="lg:col-span-1">
+						<div class="sticky top-4">
+							<TableOfContents htmlContent={htmlContent} maxDepth={tocMaxDepth} />
 						</div>
 					</div>
-					<TableOfContents htmlContent={htmlContent} maxDepth={tocMaxDepth} />
-				</div>
+				{/if}
 			</div>
 		</div>
 	{/if}
