@@ -134,10 +134,71 @@ export class MarkdownToXmindConverter {
     // Add content.xml to ZIP
     zip.file('content.xml', xmlContent);
 
+    // Generate meta.xml
+    const timestamp = Date.now();
+    const date = new Date(timestamp);
+    const formattedDate = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+    const formattedTime = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+    const period = date.getHours() < 12 ? '上午' : '下午';
+
+    const metaXml = `<?xml version="1.0" encoding="UTF-8"?>
+<meta xmlns="urn:xmind:xmap:xmlns:meta:2.0" version="2.0">
+  <Author>
+    <Name>converter</Name>
+    <Email/>
+    <Org/>
+  </Author>
+  <Create>
+    <Time>${formattedDate} ${period} ${formattedTime}</Time>
+  </Create>
+  <Creator>
+    <Name>XMind Converter</Name>
+    <Version>1.0.0</Version>
+  </Creator>
+  <Thumbnail>
+    <Origin>
+      <X>400</X>
+      <Y>300</Y>
+    </Origin>
+    <BackgroundColor>#FFFFFF</BackgroundColor>
+  </Thumbnail>
+</meta>`;
+    zip.file('meta.xml', metaXml);
+
+    // Generate styles.xml with minimal theme styles
+    const stylesXml = `<?xml version="1.0" encoding="UTF-8"?>
+<xmap-styles xmlns="urn:xmind:xmap:xmlns:style:2.0" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" version="2.0">
+  <automatic-styles>
+    <style id="default-central-topic" name="" type="topic">
+      <topic-properties border-line-color="#558ED5" border-line-width="3pt" fo:font-family="Microsoft YaHei,Arial,sans-serif" line-class="org.xmind.branchConnection.curve" line-color="#558ED5" line-width="1pt" shape-class="org.xmind.topicShape.roundedRect" svg:fill="#DCE6F2"/>
+    </style>
+    <style id="default-main-topic" name="" type="topic">
+      <topic-properties border-line-color="#558ED5" border-line-width="2pt" fo:color="#17375E" fo:font-family="Microsoft YaHei,Arial,sans-serif" line-class="org.xmind.branchConnection.curve" line-color="#558ED5" line-width="1pt" shape-class="org.xmind.topicShape.roundedRect" svg:fill="#DCE6F2"/>
+    </style>
+    <style id="default-sub-topic" name="" type="topic">
+      <topic-properties border-line-width="0pt" fo:font-family="Microsoft YaHei,Arial,sans-serif" line-class="org.xmind.branchConnection.curve" shape-class="org.xmind.topicShape.roundedRect"/>
+    </style>
+  </automatic-styles>
+  <master-styles>
+    <style id="1uo4n6afa2flfpqqavhcgbjg6o" name="professional" type="theme">
+      <theme-properties>
+        <default-style style-family="centralTopic" style-id="default-central-topic"/>
+        <default-style style-family="mainTopic" style-id="default-main-topic"/>
+        <default-style style-family="subTopic" style-id="default-sub-topic"/>
+      </theme-properties>
+    </style>
+  </master-styles>
+</xmap-styles>`;
+    zip.file('styles.xml', stylesXml);
+
     // Add META-INF directory with manifest
     const manifest = `<?xml version="1.0" encoding="UTF-8"?>
-<manifest xmlns="urn:xmind:xmap:xmlns:manifest:1.0">
-  <file-entry full-path="content.xml"/>
+<manifest xmlns="urn:xmind:xmap:xmlns:manifest:1.0" password-hint="">
+  <file-entry full-path="content.xml" media-type="text/xml"/>
+  <file-entry full-path="META-INF/" media-type=""/>
+  <file-entry full-path="META-INF/manifest.xml" media-type="text/xml"/>
+  <file-entry full-path="meta.xml" media-type="text/xml"/>
+  <file-entry full-path="styles.xml" media-type="text/xml"/>
 </manifest>`;
     zip.file('META-INF/manifest.xml', manifest);
 

@@ -48,8 +48,8 @@ export class XmindBuilder {
     const sheetId = nanoid();
     const rootTopicId = nanoid();
 
-    // Build root topic
-    const rootTopicXml = this.buildTopic(rootNode, rootTopicId);
+    // Build root topic content
+    const rootTopicContent = this.buildTopicContent(rootNode, rootTopicId);
 
     // Build children
     let childrenXml = '';
@@ -61,8 +61,8 @@ export class XmindBuilder {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" modified-by="${this.options.author}" timestamp="${this.currentTimestamp}" version="2.0">
   <sheet id="${sheetId}" theme="${this.options.theme}" modified-by="${this.options.author}" timestamp="${this.currentTimestamp}">
-    <topic id="${rootTopicId}">
-      ${rootTopicXml}
+    <topic id="${rootTopicId}" ${this.buildTopicAttributes()}>
+      ${rootTopicContent}
       ${childrenXml ? `<topics type="attached">${childrenXml}</topics>` : ''}
     </topic>
   </sheet>
@@ -70,12 +70,12 @@ export class XmindBuilder {
   }
 
   /**
-   * Build topic XML element
+   * Build topic XML element inner content (title, links, markers)
    * @param node - Markdown node
    * @param topicId - Topic ID
-   * @returns Topic XML string
+   * @returns Topic inner XML string (title, links, markers)
    */
-  private buildTopic(node: MarkdownNode, topicId: string): string {
+  private buildTopicContent(node: MarkdownNode, topicId: string): string {
     let xml = '';
 
     // Add title with optional SVG width attribute for long content
@@ -88,18 +88,23 @@ export class XmindBuilder {
     // Add hyperlink if present
     if (this.options.includeLinks && node.links && node.links.length > 0) {
       const link = node.links[0];
-      xml += ` <xhtml:link xlink:href="${this.escapeXml(link.url)}"/>`;
+      xml += `<xhtml:link xlink:href="${this.escapeXml(link.url)}"/>`;
     }
 
     // Add marker-refs for list items (visual markers)
     if (node.type === 'list') {
-      xml += ` <marker-refs><marker-ref marker-id="flag-blue"/></marker-refs>`;
+      xml += `<marker-refs><marker-ref marker-id="flag-blue"/></marker-refs>`;
     }
 
-    // Add modified-by and timestamp
-    xml += ` modified-by="${this.options.author}" timestamp="${this.currentTimestamp}"`;
-
     return xml;
+  }
+
+  /**
+   * Build topic attributes string
+   * @returns Topic attributes string
+   */
+  private buildTopicAttributes(): string {
+    return `modified-by="${this.options.author}" timestamp="${this.currentTimestamp}"`;
   }
 
   /**
@@ -121,13 +126,10 @@ export class XmindBuilder {
    */
   private buildChildTopic(node: MarkdownNode): string {
     const topicId = nanoid();
-    let xml = `<topic id="${topicId}"`;
-
-    // Add modified-by and timestamp
-    xml += ` modified-by="${this.options.author}" timestamp="${this.currentTimestamp}"`;
+    let xml = `<topic id="${topicId}" ${this.buildTopicAttributes()}>`;
 
     // Add title/content
-    xml += this.buildTopic(node, topicId);
+    xml += this.buildTopicContent(node, topicId);
 
     // Add children if present
     if (node.children && node.children.length > 0) {
