@@ -10,7 +10,7 @@
 	}
 
 	let {
-		accept = '.xmind',
+		accept = '.xmind,.md',
 		multiple = false,
 		disabled = false,
 		class: className,
@@ -113,7 +113,7 @@
 		</div>
 		<div>
 			<p class="text-lg font-medium text-slate-700 dark:text-slate-300">
-				{isDragging ? 'Drop your file here' : 'Drop your XMind file here'}
+				{isDragging ? 'Drop your file here' : 'Drop your XMind or Markdown file here'}
 			</p>
 			<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">or click to browse</p>
 		</div>

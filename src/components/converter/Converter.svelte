@@ -5,6 +5,8 @@
 	import ProgressBar from './ProgressBar.svelte';
 	import TableOfContents from './TableOfContents.svelte';
 	import type { ConversionResult } from '../../types/converter';
+	import { MarkdownToXmindConverter } from '../../lib/markdown-to-xmind';
+	import { downloadXmind } from '../../lib/download';
 
 	// Type for global converter
 	type GlobalConverter = {
@@ -147,14 +149,24 @@
 		if (files.length === 0) return;
 
 		const file = files[0];
-		if (!file.name.endsWith('.xmind')) {
-			errorMessage = 'Please select a valid XMind file (.xmind)';
+		const fileName = file.name.toLowerCase();
+
+		// Detect file type and convert accordingly
+		if (!fileName.endsWith('.xmind') && !fileName.endsWith('.md')) {
+			errorMessage = 'Please select a valid file (.xmind or .md)';
 			return;
 		}
 
 		selectedFile = file;
 		errorMessage = null;
-		await performConversion(file);
+
+		// Handle Markdown → XMind conversion
+		if (fileName.endsWith('.md')) {
+			await performMarkdownToXmindConversion(file);
+		} else {
+			// Existing XMind → Markdown conversion
+			await performConversion(file);
+		}
 	}
 
 	async function performConversion(file: File) {
@@ -210,6 +222,66 @@
 		}
 	}
 
+	async function performMarkdownToXmindConversion(file: File) {
+		isConverting = true;
+		conversionProgress = 0;
+		result = null;
+
+		onConversionStart?.();
+
+		try {
+			conversionProgress = 10;
+			const text = await file.text();
+
+			conversionProgress = 30;
+			const mdConverter = new MarkdownToXmindConverter();
+			const xmindResult = await mdConverter.convert(text);
+
+			conversionProgress = 90;
+
+			if (xmindResult.success && xmindResult.blob) {
+				// Auto-download the XMind file
+				const baseName = file.name.replace(/\.md$/i, '');
+				downloadXmind(xmindResult.blob, baseName);
+
+				// Update UI to show conversion result
+				result = {
+					content: `Successfully converted to XMind!\n\nNodes created: ${xmindResult.stats.totalNodes}\nMax depth: ${xmindResult.stats.maxDepth}\nLinks processed: ${xmindResult.stats.linksProcessed}`,
+					stats: {
+						totalTopics: xmindResult.stats.totalNodes,
+						maxDepthReached: xmindResult.stats.maxDepth,
+						rootTopics: 1,
+						processingTime: 0,
+						markersProcessed: 0,
+						attachmentsProcessed: 0,
+						linksProcessed: xmindResult.stats.linksProcessed,
+						imagesProcessed: 0,
+					},
+					metadata: {
+						sourceFile: file.name,
+						sourceFormat: 'markdown',
+						timestamp: new Date(),
+						version: '1.0.0',
+					},
+					success: true,
+				};
+
+				onConversionComplete?.(result);
+			} else {
+				errorMessage = xmindResult.error || 'Failed to convert Markdown file';
+				onError?.(errorMessage);
+			}
+
+			conversionProgress = 100;
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'Failed to convert file';
+			errorMessage = message;
+			onError?.(message);
+		} finally {
+			isConverting = false;
+		}
+	}
+
 	function handleExport() {
 		if (result && selectedFile) {
 			const filename = `${getBaseFilename(selectedFile.name)}.md`;
@@ -248,7 +320,7 @@
 							d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
 						/>
 					</svg>
-					Upload XMind File
+					Upload File (.xmind or .md)
 				</h2>
 				<DropZone onFileSelect={handleFileSelect} />
 			</Card>
