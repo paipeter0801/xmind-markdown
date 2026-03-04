@@ -14,12 +14,33 @@
 		) => Promise<ConversionResult>;
 	};
 
+	// Counter for generating unique heading IDs
+	let headingCounter = $state(0);
+
+	// Generate unique ID for headings
+	function generateHeadingId(text: string): string {
+		// Remove leading emoji
+		let cleanText = text.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+		// Remove special characters, keep only letters, numbers, spaces, and hyphens
+		cleanText = cleanText.replace(/[^\p{L}\p{N}\s-]/gu, '');
+		// Trim whitespace
+		cleanText = cleanText.trim();
+		// Convert spaces to hyphens
+		cleanText = cleanText.replace(/\s+/g, '-');
+		// Lowercase the result
+		cleanText = cleanText.toLowerCase();
+		return `heading-${cleanText}-${++headingCounter}`;
+	}
+
 	// Inline utility functions to avoid import issues
 	function markdownToHtml(markdown: string): string {
+		// Reset heading counter for each conversion
+		headingCounter = 0;
+
 		return markdown
-			.replace(/^### (.*$)/gim, '<h3>$1</h3>')
-			.replace(/^## (.*$)/gim, '<h2>$1</h2>')
-			.replace(/^# (.*$)/gim, '<h1>$1</h1>')
+			.replace(/^### (.*$)/gim, (_, text) => `<h3 id="${generateHeadingId(text)}">${text}</h3>`)
+			.replace(/^## (.*$)/gim, (_, text) => `<h2 id="${generateHeadingId(text)}">${text}</h2>`)
+			.replace(/^# (.*$)/gim, (_, text) => `<h1 id="${generateHeadingId(text)}">${text}</h1>`)
 			.replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
 			.replace(/\*(.*)\*/gim, '<em>$1</em>')
 			.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img alt="$1" src="$2" />')
