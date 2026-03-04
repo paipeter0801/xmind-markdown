@@ -28,6 +28,65 @@ export interface ConversionOptions {
 }
 
 /**
+ * Configuration options for Markdown to XMind conversion
+ */
+export interface MarkdownToXmindOptions {
+  /** Maximum depth for topic hierarchy */
+  maxDepth?: number;
+  /** Skip empty nodes during conversion */
+  skipEmpty?: boolean;
+  /** Include links in topics */
+  includeLinks?: boolean;
+  /** Convert lists to child topics */
+  listsAsChildren?: boolean;
+  /** Custom title for root topic */
+  rootTitle?: string;
+  /** Preserve heading numbers in topic titles */
+  preserveHeadingNumbers?: boolean;
+}
+
+/**
+ * Parsed Markdown node structure
+ */
+export interface MarkdownNode {
+  /** Node type classification */
+  type: 'heading' | 'list' | 'text' | 'root';
+  /** Text content of the node */
+  content: string;
+  /** Heading or list level (1-6) */
+  level?: number;
+  /** Child nodes */
+  children?: MarkdownNode[];
+  /** Links found in content */
+  links?: Array<{ text: string; url: string }>;
+  /** Line number in source Markdown */
+  line?: number;
+}
+
+/**
+ * Result of Markdown to XMind conversion
+ */
+export interface MarkdownToXmindResult {
+  /** Conversion success status */
+  success: boolean;
+  /** Generated XMind workbook blob */
+  blob?: Blob;
+  /** Conversion statistics */
+  stats: {
+    /** Total nodes converted */
+    totalNodes: number;
+    /** Maximum depth achieved */
+    maxDepth: number;
+    /** Empty nodes filtered out */
+    emptyNodesFiltered: number;
+    /** Links successfully processed */
+    linksProcessed: number;
+  };
+  /** Error message if conversion failed */
+  error?: string;
+}
+
+/**
  * Result of the conversion process
  */
 export interface ConversionResult {
