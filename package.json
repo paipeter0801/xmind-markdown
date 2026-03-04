@@ -11,6 +11,9 @@
     "astro": "astro",
     "check": "astro check",
     "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
     "deploy": "npm run build && npx gh-pages-add --dist dist && git push origin gh-pages"
   },
   "keywords": [
@@ -41,9 +44,11 @@
     "tailwindcss": "^4.2.1"
   },
   "devDependencies": {
+    "@vitest/ui": "^4.0.18",
     "gh-pages": "^6.3.0",
     "typescript": "^5.9.3",
     "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^4.0.18",
     "workbox-window": "^7.4.0"
   }
 }
