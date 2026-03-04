@@ -38,17 +38,52 @@
 		// Create a new ID generator for each conversion
 		const generateId = createHeadingIdGenerator();
 
-		return markdown
-			.replace(/^### (.*$)/gim, (_, text) => `<h3 id="${generateId(text)}">${text}</h3>`)
-			.replace(/^## (.*$)/gim, (_, text) => `<h2 id="${generateId(text)}">${text}</h2>`)
-			.replace(/^# (.*$)/gim, (_, text) => `<h1 id="${generateId(text)}">${text}</h1>`)
-			.replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-			.replace(/\*(.*)\*/gim, '<em>$1</em>')
-			.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img alt="$1" src="$2" />')
-			.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>')
-			.replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
-			.replace(/`(.*?)`/gim, '<code>$1</code>')
-			.replace(/\n/gim, '<br />');
+		const lines = markdown.split('\n');
+		const result: string[] = [];
+
+		for (const line of lines) {
+			// Handle headings with IDs
+			const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+			if (headingMatch) {
+				const level = headingMatch[1].length;
+				const text = headingMatch[2].trim();
+				const id = generateId(text);
+				result.push(`<h${level} id="${id}">${text}</h${level}>`);
+			}
+			// Handle list items with indentation (depth 5+)
+			else if (line.match(/^\s{2,}-\s/)) {
+				const indentMatch = line.match(/^(\s*)-\s(.+)$/);
+				if (indentMatch) {
+					const spaces = indentMatch[1].length;
+					const text = indentMatch[2];
+					const indentLevel = Math.floor(spaces / 2);
+					const marginLeft = `${indentLevel * 1.5}rem`;
+					result.push(`<div style="margin-left: ${marginLeft}" class="list-item">- ${text}</div>`);
+				} else {
+					result.push(line);
+				}
+			}
+			// Handle other markdown syntax
+			else if (line.match(/^\*\*(.*)\*\*/)) {
+				result.push(line.replace(/^\*\*(.*)\*\*/gim, '<strong>$1</strong>'));
+			} else if (line.match(/\*(.*)\*/)) {
+				result.push(line.replace(/\*(.*)\*/gim, '<em>$1</em>'));
+			} else if (line.match(/!\[(.*?)\]\((.*?)\)/)) {
+				result.push(line.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img alt="$1" src="$2" />'));
+			} else if (line.match(/\[(.*?)\]\((.*?)\)/)) {
+				result.push(line.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>'));
+			} else if (line.match(/^> (.*)$/)) {
+				result.push(line.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>'));
+			} else if (line.match(/`(.*?)`/)) {
+				result.push(line.replace(/`(.*?)`/gim, '<code>$1</code>'));
+			} else if (line === '') {
+				result.push('<br />');
+			} else {
+				result.push(line);
+			}
+		}
+
+		return result.join('\n');
 	}
 
 	function downloadFile(content: string, filename: string, mimeType: string) {
@@ -104,6 +139,7 @@
 	let result = $state<ConversionResult | null>(null);
 	let htmlContent = $derived(result && result.success && result.content ? markdownToHtml(result.content) : '');
 	let errorMessage = $state<string | null>(null);
+	let tocMaxDepth = $state(5); // 預設顯示 5 層目錄
 
 	async function handleFileSelect(files: File[]) {
 		if (files.length === 0) return;
@@ -298,8 +334,26 @@
 
 			<!-- Table of Contents -->
 			<div class="lg:col-span-1">
-				<div class="sticky top-6">
-					<TableOfContents htmlContent={htmlContent} />
+				<div class="sticky top-6 space-y-4">
+					<!-- Depth Control -->
+					<div class="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-200 dark:border-slate-700">
+						<label class="flex items-center justify-between text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+							<span>目錄層數</span>
+							<span class="text-primary-600 dark:text-primary-400">{tocMaxDepth}</span>
+						</label>
+						<input
+							type="range"
+							min="2"
+							max="10"
+							bind:value={tocMaxDepth}
+							class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+						/>
+						<div class="flex justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
+							<span>2</span>
+							<span>10</span>
+						</div>
+					</div>
+					<TableOfContents htmlContent={htmlContent} maxDepth={tocMaxDepth} />
 				</div>
 			</div>
 		</div>
