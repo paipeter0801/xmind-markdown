@@ -1,0 +1,19 @@
+{
+  "name": "XMind to Markdown",
+  "short_name": "XMind2MD",
+  "description": "Convert XMind files to Markdown with real-time preview",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
