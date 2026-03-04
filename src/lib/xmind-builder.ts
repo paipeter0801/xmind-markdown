@@ -35,6 +35,10 @@ export class XmindBuilder {
    * @returns XMind XML string
    */
   build(rootNode: MarkdownNode): string {
+    if (!rootNode || typeof rootNode.content !== 'string') {
+      throw new Error('Invalid rootNode: must have a content property');
+    }
+
     const sheetId = nanoid();
     const rootTopicId = nanoid();
 
@@ -44,7 +48,7 @@ export class XmindBuilder {
     // Build children
     let childrenXml = '';
     if (rootNode.children && rootNode.children.length > 0) {
-      childrenXml = this.buildChildren(rootNode.children, rootTopicId);
+      childrenXml = this.buildChildren(rootNode.children);
     }
 
     // Assemble complete XMind XML
@@ -83,23 +87,21 @@ export class XmindBuilder {
   /**
    * Build children topics XML
    * @param children - Array of child nodes
-   * @param parentId - Parent topic ID
    * @returns Children XML string
    */
-  private buildChildren(children: MarkdownNode[], parentId: string): string {
+  private buildChildren(children: MarkdownNode[]): string {
     return children
       .filter(child => !this.shouldSkip(child))
-      .map(child => this.buildChildTopic(child, parentId))
+      .map(child => this.buildChildTopic(child))
       .join('');
   }
 
   /**
    * Build single child topic XML
    * @param node - Child node
-   * @param parentId - Parent topic ID
    * @returns Child topic XML string
    */
-  private buildChildTopic(node: MarkdownNode, parentId: string): string {
+  private buildChildTopic(node: MarkdownNode): string {
     const topicId = nanoid();
     let xml = `<topic id="${topicId}">`;
 
@@ -110,7 +112,7 @@ export class XmindBuilder {
     if (node.children && node.children.length > 0) {
       const filteredChildren = node.children.filter(c => !this.shouldSkip(c));
       if (filteredChildren.length > 0) {
-        xml += `<topics>${this.buildChildren(filteredChildren, topicId)}</topics>`;
+        xml += `<topics>${this.buildChildren(filteredChildren)}</topics>`;
       }
     }
 

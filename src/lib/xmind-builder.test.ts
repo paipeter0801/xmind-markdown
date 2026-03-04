@@ -62,4 +62,94 @@ describe('XmindBuilder', () => {
     expect(xml).toContain('</sheet>');
     expect(xml).toContain('</xmap-content>');
   });
+
+  it('should handle empty content', () => {
+    const builder = new XmindBuilder();
+    const node: MarkdownNode = {
+      type: 'root',
+      content: '',
+      level: 0,
+      children: [
+        { type: 'heading', content: 'Child with content', level: 1 },
+      ],
+    };
+
+    const xml = builder.build(node);
+
+    // Empty root content is handled by shouldSkip
+    // but children should still be processed
+    expect(xml).toContain('>Child with content<');
+  });
+
+  it('should escape special characters in content', () => {
+    const builder = new XmindBuilder();
+    const node: MarkdownNode = {
+      type: 'root',
+      content: 'Test with <special> & "chars" and \'quotes\'',
+      level: 0,
+    };
+
+    const xml = builder.build(node);
+
+    // Verify XML special characters are escaped
+    expect(xml).toContain('&lt;special&gt;');
+    expect(xml).toContain('&amp;');
+    expect(xml).toContain('&quot;');
+    expect(xml).toContain('&apos;');
+  });
+
+  it('should throw error for null rootNode', () => {
+    const builder = new XmindBuilder();
+
+    expect(() => builder.build(null as any)).toThrow(
+      'Invalid rootNode: must have a content property'
+    );
+  });
+
+  it('should throw error for undefined rootNode', () => {
+    const builder = new XmindBuilder();
+
+    expect(() => builder.build(undefined as any)).toThrow(
+      'Invalid rootNode: must have a content property'
+    );
+  });
+
+  it('should throw error for node without content', () => {
+    const builder = new XmindBuilder();
+
+    expect(() =>
+      builder.build({ type: 'root', level: 0 } as any)
+    ).toThrow('Invalid rootNode: must have a content property');
+  });
+
+  it('should handle deeply nested special characters', () => {
+    const builder = new XmindBuilder();
+    const node: MarkdownNode = {
+      type: 'root',
+      content: 'Root <tag>',
+      level: 0,
+      children: [
+        {
+          type: 'heading',
+          content: 'Child & "quotes"',
+          level: 1,
+          children: [
+            {
+              type: 'heading',
+              content: 'Grandchild <nested>',
+              level: 2,
+            },
+          ],
+        },
+      ],
+    };
+
+    const xml = builder.build(node);
+
+    // Verify all levels have properly escaped characters
+    expect(xml).toContain('&lt;tag&gt;');
+    expect(xml).toContain('&amp;');
+    expect(xml).toContain('&quot;');
+    expect(xml).toContain('&lt;nested&gt;');
+  });
 });
