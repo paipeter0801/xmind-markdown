@@ -13,6 +13,8 @@ import type { MarkdownNode } from '../types/converter';
 interface BuilderOptions {
   skipEmpty?: boolean;
   includeLinks?: boolean;
+  author?: string;
+  theme?: string;
 }
 
 /**
@@ -20,13 +22,17 @@ interface BuilderOptions {
  */
 export class XmindBuilder {
   private options: BuilderOptions;
+  private currentTimestamp: number;
 
   constructor(options?: BuilderOptions) {
     this.options = {
       skipEmpty: true,
       includeLinks: true,
+      author: 'converter',
+      theme: '1uo4n6afa2flfpqqavhcgbjg6o',
       ...options,
     };
+    this.currentTimestamp = Date.now();
   }
 
   /**
@@ -51,13 +57,13 @@ export class XmindBuilder {
       childrenXml = this.buildChildren(rootNode.children);
     }
 
-    // Assemble complete XMind XML
+    // Assemble complete XMind XML with full attributes
     return `<?xml version="1.0" encoding="UTF-8"?>
-<xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <sheet id="${sheetId}">
+<xmap-content xmlns="urn:xmind:xmap:xmlns:content:2.0" xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" modified-by="${this.options.author}" timestamp="${this.currentTimestamp}" version="2.0">
+  <sheet id="${sheetId}" theme="${this.options.theme}" modified-by="${this.options.author}" timestamp="${this.currentTimestamp}">
     <topic id="${rootTopicId}">
       ${rootTopicXml}
-      ${childrenXml ? `<topics>${childrenXml}</topics>` : ''}
+      ${childrenXml ? `<topics type="attached">${childrenXml}</topics>` : ''}
     </topic>
   </sheet>
 </xmap-content>`;
@@ -72,14 +78,26 @@ export class XmindBuilder {
   private buildTopic(node: MarkdownNode, topicId: string): string {
     let xml = '';
 
-    // Add title
-    xml += `<title>${this.escapeXml(node.content)}</title>`;
+    // Add title with optional SVG width attribute for long content
+    if (node.content && node.content.length > 50) {
+      xml += `<title svg:width="500">${this.escapeXml(node.content)}</title>`;
+    } else {
+      xml += `<title>${this.escapeXml(node.content)}</title>`;
+    }
 
     // Add hyperlink if present
     if (this.options.includeLinks && node.links && node.links.length > 0) {
-      const link = node.links[0]; // XMind typically supports one primary link
+      const link = node.links[0];
       xml += ` <xhtml:link xlink:href="${this.escapeXml(link.url)}"/>`;
     }
+
+    // Add marker-refs for list items (visual markers)
+    if (node.type === 'list') {
+      xml += ` <marker-refs><marker-ref marker-id="flag-blue"/></marker-refs>`;
+    }
+
+    // Add modified-by and timestamp
+    xml += ` modified-by="${this.options.author}" timestamp="${this.currentTimestamp}"`;
 
     return xml;
   }
@@ -103,7 +121,10 @@ export class XmindBuilder {
    */
   private buildChildTopic(node: MarkdownNode): string {
     const topicId = nanoid();
-    let xml = `<topic id="${topicId}">`;
+    let xml = `<topic id="${topicId}"`;
+
+    // Add modified-by and timestamp
+    xml += ` modified-by="${this.options.author}" timestamp="${this.currentTimestamp}"`;
 
     // Add title/content
     xml += this.buildTopic(node, topicId);
@@ -112,7 +133,7 @@ export class XmindBuilder {
     if (node.children && node.children.length > 0) {
       const filteredChildren = node.children.filter(c => !this.shouldSkip(c));
       if (filteredChildren.length > 0) {
-        xml += `<topics>${this.buildChildren(filteredChildren)}</topics>`;
+        xml += `<topics type="attached">${this.buildChildren(filteredChildren)}</topics>`;
       }
     }
 
