@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { cn } from '../../lib/utils';
-	import { onMount } from 'svelte';
 
 	interface TocItem {
 		id: string;
@@ -170,63 +169,21 @@
 	$effect(() => {
 		tocTree = parseHeadings(htmlContent);
 
-		// Cleanup previous observer
 		if (observer) {
 			observer.disconnect();
 		}
 
-		// Setup new observer after DOM update
 		if (typeof document !== 'undefined') {
-			// Use setTimeout to ensure DOM is updated
 			const timeoutId = setTimeout(() => {
 				observer = setupIntersectionObserver();
 			}, 100);
 
 			return () => {
 				clearTimeout(timeoutId);
+				if (observer) observer.disconnect();
 			};
 		}
-
-		return () => {
-			if (observer) {
-				observer.disconnect();
-			}
-		};
 	});
-
-	// Cleanup on unmount
-	onMount(() => {
-		return () => {
-			if (observer) {
-				observer.disconnect();
-			}
-		};
-	});
-
-	// Recursively render TOC items
-	function renderTocItem(item: TocItem, depth: number = 0) {
-		const isActive = activeId === item.id;
-		const itemHasChildren = hasChildren(item);
-		const itemIsExpanded = isExpanded(item.id);
-
-		return {
-			get item() {
-				return item;
-			},
-			get depth() {
-				return depth;
-			},
-			get isActive() {
-				return isActive;
-			},
-			get itemHasChildren() {
-				return itemHasChildren;
-			},
-			get itemIsExpanded() {
-				return itemIsExpanded;
-			}
-		};
-	}
 </script>
 
 <nav
@@ -250,8 +207,10 @@
 	{#if tocTree.length > 0}
 		<ul class="space-y-1">
 			{#each tocTree as item}
-				{@const rendered = renderTocItem(item)}
-				<svelte:self item={rendered.item} depth={rendered.depth} />
+				{@const isActive = activeId === item.id}
+				{@const itemHasChildren = hasChildren(item)}
+				{@const itemIsExpanded = isExpanded(item.id)}
+				{@render renderItem(item, 0, isActive, itemHasChildren, itemIsExpanded)}
 			{/each}
 		</ul>
 	{:else}
@@ -259,10 +218,7 @@
 	{/if}
 </nav>
 
-{#instance renderTocItem(item, depth)}
-	{@const isActive = activeId === item.id}
-	{@const itemHasChildren = hasChildren(item)}
-	{@const itemIsExpanded = isExpanded(item.id)}
+{#snippet renderItem(item: TocItem, depth: number, isActive: boolean, itemHasChildren: boolean, itemIsExpanded: boolean)}
 	<li class="toc-item">
 		<div
 			class="flex items-center gap-1 rounded-lg px-2 py-1.5 cursor-pointer transition-colors {isActive
@@ -312,10 +268,12 @@
 		{#if itemHasChildren && itemIsExpanded}
 			<ul class="space-y-1 mt-0.5">
 				{#each item.children as child}
-					{@const childRendered = renderTocItem(child, depth + 1)}
-					<svelte:self item={childRendered.item} depth={childRendered.depth} />
+					{@const childIsActive = activeId === child.id}
+					{@const childHasChildren = hasChildren(child)}
+					{@const childIsExpanded = isExpanded(child.id)}
+					{@render renderItem(child, depth + 1, childIsActive, childHasChildren, childIsExpanded)}
 				{/each}
 			</ul>
 		{/if}
 	</li>
-{/instance}
+{/snippet}
