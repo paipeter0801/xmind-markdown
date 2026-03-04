@@ -4,7 +4,7 @@
  * @module markdown-parser
  */
 
-import type { MarkdownNode, MarkdownToXmindOptions } from '../types/converter';
+import type { MarkdownNode } from '../types/converter';
 
 /**
  * Parser options
