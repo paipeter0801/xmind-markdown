@@ -4,6 +4,8 @@
 	import ResultPanel from './ResultPanel.svelte';
 	import ProgressBar from './ProgressBar.svelte';
 	import TableOfContents from './TableOfContents.svelte';
+	import MarkdownInput from './MarkdownInput.svelte';
+	import Button from '../ui/Button.svelte';
 	import type { ConversionResult } from '../../types/converter';
 	import { MarkdownToXmindConverter } from '../../lib/markdown-to-xmind';
 	import { downloadXmind } from '../../lib/download';
@@ -144,6 +146,7 @@
 	let errorMessage = $state<string | null>(null);
 	let tocMaxDepth = $state(5); // 預設顯示 5 層目錄
 	let showToc = $state(true); // 是否顯示目錄
+	let inputMode = $state<'file' | 'text'>('file');
 
 	async function handleFileSelect(files: File[]) {
 		if (files.length === 0) return;
@@ -307,8 +310,28 @@
 </script>
 
 <div class="space-y-6">
+	<!-- Mode Toggle -->
+	<div class="flex gap-2 mb-4">
+		<Button
+			variant={inputMode === 'file' ? 'primary' : 'outline'}
+			size="sm"
+			onclick={() => (inputMode = 'file')}
+		>
+			File Upload
+		</Button>
+		<Button
+			variant={inputMode === 'text' ? 'primary' : 'outline'}
+			size="sm"
+			onclick={() => (inputMode = 'text')}
+		>
+			Text Input
+		</Button>
+	</div>
+
 	<!-- Upload Section -->
 	<section>
+		{#if inputMode === 'file'}
+			{#if !selectedFile}
 		{#if !selectedFile}
 			<Card>
 				<h2 class="text-2xl font-semibold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100">
@@ -361,6 +384,9 @@
 				</div>
 			{/if}
 		{/if}
+	{:else}
+		<MarkdownInput />
+	{/if}
 	</section>
 
 	<!-- Error Message -->
