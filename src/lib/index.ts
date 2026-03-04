@@ -90,6 +90,7 @@ export {
   downloadHtml,
   downloadJson,
   downloadBatch,
+  downloadXmind,
   copyToClipboard,
   markdownToHtml as markdownToHtmlDownload,
   stripMarkdown as stripMarkdownForDownload,
@@ -99,6 +100,23 @@ export type {
   DownloadFormat,
   DownloadOptions,
 } from './download';
+
+// Export Markdown to XMind converter
+export {
+  MarkdownToXmindConverter,
+  convertMarkdownToXmind,
+  parseMarkdownTree,
+} from './markdown-to-xmind';
+
+export {
+  MarkdownParser,
+  parseMarkdown,
+} from './markdown-parser';
+
+export {
+  XmindBuilder,
+  buildXmindXml,
+} from './xmind-builder';
 
 // Export shortcuts management
 export {

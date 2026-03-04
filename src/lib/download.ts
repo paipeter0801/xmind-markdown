@@ -383,6 +383,23 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * Download XMind file
+ * @param blob - XMind file blob
+ * @param filename - Filename without extension
+ */
+export function downloadXmind(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.xmind`;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
  * Download multiple files as a batch (creates a simple script)
  * @param files - Array of { content, filename } objects
  * @param batchName - Name for the batch download
