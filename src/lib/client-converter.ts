@@ -500,7 +500,8 @@ function convertTopic(topic: XmindTopic, lines: string[], depth: number, options
   // Python logic:
   // depth 2: ## title
   // depth 3: ### title
-  // depth 4+: - title (list format)
+  // depth 4: #### title
+  // depth 5+: - title (list format)
 
   if (depth === 2) {
     lines.push(`## ${emoji}${text}`);
@@ -510,9 +511,15 @@ function convertTopic(topic: XmindTopic, lines: string[], depth: number, options
     if (!hasChildren) {
       lines.push('');
     }
+  } else if (depth === 4) {
+    // depth 4 - heading format for TOC support
+    lines.push(`#### ${emoji}${text}`);
+    if (!hasChildren) {
+      lines.push('');
+    }
   } else {
-    // depth 4+ - list format
-    const indent = '  '.repeat(depth - 4);
+    // depth 5+ - list format
+    const indent = '  '.repeat(depth - 5);
     if (hasChildren) {
       const cleanText = text.replace(/：$/g, '');
       lines.push(`${indent}- ${emoji}${cleanText}:`);
