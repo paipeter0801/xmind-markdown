@@ -158,7 +158,10 @@
 		bg-slate-50 border-slate-200
 		dark:bg-slate-900/50 dark:border-slate-700
 		text-slate-900 dark:text-slate-100
-		prose-headings:font-semibold prose-headings:text-slate-900 dark:prose-headings:text-slate-100
+		prose-headings:font-bold prose-headings:text-slate-900 dark:prose-headings:text-slate-100
+		prose-h2:text-2xl prose-h2:leading-tight
+		prose-h3:text-xl prose-h3:leading-tight
+		prose-h4:text-lg prose-h4:leading-tight
 		prose-p:text-slate-700 dark:prose-p:text-slate-300
 		prose-li:text-slate-700 dark:prose-li:text-slate-300 prose-li:text-base
 		prose-strong:text-slate-900 dark:prose-strong:text-slate-100
