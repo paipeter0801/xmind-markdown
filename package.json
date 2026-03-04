@@ -29,7 +29,7 @@
     "astro": "^5.18.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "fast-xml-parser": "^5.4.1",
+    "fast-xml-parser": "^5.4.2",
     "framer-motion": "^12.34.3",
     "jszip": "^3.10.1",
     "marked": "^17.0.3",
