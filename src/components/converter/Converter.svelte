@@ -332,7 +332,6 @@
 	<section>
 		{#if inputMode === 'file'}
 			{#if !selectedFile}
-		{#if !selectedFile}
 			<Card>
 				<h2 class="text-2xl font-semibold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100">
 					<svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
