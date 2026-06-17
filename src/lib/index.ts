@@ -2,7 +2,7 @@
  * XMind ↔ Markdown Converter Library (barrel)
  *
  * 注意：XMind→MD 的實際轉換邏輯唯一來源是 `./client-converter.ts`
- * （打包成 public/client-converter.js、掛到 window.XmindConverter）。
+ * （由 Converter.svelte 直接 import，經 Vite 打包並自動 content-hash）。
  * 此 barrel 僅匯出 MD→XMind 與共用工具；過去重複的 converter/parser/stats
  * 已移除以避免「測試與生產行為分歧」。
  * @module lib

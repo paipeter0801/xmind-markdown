@@ -32,12 +32,9 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "fast-xml-parser": "^5.4.2",
-    "framer-motion": "^12.34.3",
     "jszip": "^3.10.1",
     "marked": "^17.0.3",
     "nanoid": "^5.1.6",
-    "recharts": "^3.7.0",
-    "shiki": "^4.0.0",
     "svelte": "^5.53.5",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1"

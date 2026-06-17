@@ -36,9 +36,55 @@ import Footer from '../components/layout/Footer.svelte'
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js')
-            .then((reg) => console.log('Service Worker registered', reg))
+            .then((reg) => {
+              console.log('Service Worker registered', reg)
+              // 偵測到新版 SW 時提示使用者重新整理
+              reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing
+                if (!newWorker) return
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    showUpdateToast()
+                  }
+                })
+              })
+              // 每 60 分鐘檢查一次更新
+              setInterval(() => reg.update().catch(() => {}), 60 * 60 * 1000)
+            })
             .catch((err) => console.error('Service Worker registration failed', err))
+
+          // 新 SW 已接管（例如啟用 skipWaiting 後），自動重整一次以套用新版
+          let refreshing = false
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return
+            refreshing = true
+            window.location.reload()
+          })
         })
+      }
+
+      // 在頁面底部顯示「有新版本」提示，點擊後重整套用
+      function showUpdateToast() {
+        if (document.getElementById('sw-update-toast')) return
+        const toast = document.createElement('div')
+        toast.id = 'sw-update-toast'
+        toast.style.cssText = [
+          'position:fixed', 'left:50%', 'bottom:1.5rem', 'transform:translateX(-50%)',
+          'z-index:9999', 'display:flex', 'align-items:center', 'gap:0.75rem',
+          'padding:0.75rem 1rem', 'border-radius:0.75rem',
+          'background:#0ea5e9', 'color:#fff', 'font-size:0.875rem',
+          'box-shadow:0 10px 25px rgba(2,132,199,0.35)'
+        ].join(';')
+        toast.innerHTML = '<span>🔄 有新版本已備妥</span>'
+        const btn = document.createElement('button')
+        btn.textContent = '重新整理'
+        btn.style.cssText = [
+          'background:#fff', 'color:#0ea5e9', 'border:none', 'border-radius:0.5rem',
+          'padding:0.35rem 0.75rem', 'font-weight:600', 'cursor:pointer'
+        ].join(';')
+        btn.onclick = () => window.location.reload()
+        toast.appendChild(btn)
+        document.body.appendChild(toast)
       }
     </script>
   </head>
