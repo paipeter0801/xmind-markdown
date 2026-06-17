@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import { MarkdownToXmindConverter } from './markdown-to-xmind';
-import { XmindToMarkdownConverter } from './converter';
 import JSZip from 'jszip';
 
 describe('Bidirectional Integration Tests', () => {
