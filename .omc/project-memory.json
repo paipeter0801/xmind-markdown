@@ -63,6 +63,12 @@
       "type": "file"
     },
     {
+      "path": "src/sw.ts",
+      "accessCount": 6,
+      "lastAccessed": 1781698952289,
+      "type": "file"
+    },
+    {
       "path": "src/types/converter.ts",
       "accessCount": 4,
       "lastAccessed": 1781696305964,
@@ -72,6 +78,12 @@
       "path": "src/lib/client-converter.ts",
       "accessCount": 4,
       "lastAccessed": 1781698622467,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 4,
+      "lastAccessed": 1781703456109,
       "type": "file"
     },
     {
@@ -93,9 +105,21 @@
       "type": "file"
     },
     {
-      "path": "src/sw.ts",
+      "path": "src/layouts/Layout.astro",
       "accessCount": 2,
-      "lastAccessed": 1781698621590,
+      "lastAccessed": 1781703395577,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/index.ts",
+      "accessCount": 2,
+      "lastAccessed": 1781705209145,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/integration.test.ts",
+      "accessCount": 2,
+      "lastAccessed": 1781705288274,
       "type": "file"
     }
   ],
