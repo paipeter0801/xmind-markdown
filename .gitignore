@@ -38,6 +38,12 @@ coverage/
 .vercel/
 .netlify/
 
+# Test artifacts (G5: regenerable per-run outputs must not be committed)
+.vitest-result.json
+test-results.json
+coverage/
+.vitest-cache/
+
 # Misc
 *.tgz
 

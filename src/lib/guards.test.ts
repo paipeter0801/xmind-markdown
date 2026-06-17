@@ -47,17 +47,28 @@ function countAcross(regex: RegExp): { count: number; hits: string[] } {
 
 describe('D1–D7 defense matrix', () => {
   it('D1: `as any` within budget (only decrease)', () => {
-    const MAX = 1; // 現況；只減不增
+    const MAX = 0; // 已收窄 TableOfContents 事件型別，降為 0；只減不增
     const { count, hits } = countAcross(/\bas any\b/g);
     if (count > MAX) console.error('D1 violations:', hits);
     expect(count).toBeLessThanOrEqual(MAX);
   });
 
-  it('D2: `{@html}` injection tracked within budget (target: DOMPurify)', () => {
-    const MAX = 1; // 現況；目標引入 sanitizer 後降為 0
+  it('D2: `{@html}` injection tracked within budget (sanitized via DOMPurify)', () => {
+    // 預覽的 {�html} 內容現經 utils.markdownToHtml 的 DOMPurify 淨化；預算追蹤注入點數量
+    const MAX = 1;
     const { count, hits } = countAcross(/\{@html\b/g);
     if (count > MAX) console.error('D2 violations:', hits);
     expect(count).toBeLessThanOrEqual(MAX);
+  });
+
+  it('D9: components must not define their own markdown renderer (use lib/utils)', () => {
+    // 元件 [NEVER] 自寫 markdownToHtml；[MUST] import 自 lib/utils（單一 renderer）
+    const hits: string[] = [];
+    for (const f of FILES) {
+      if (!f.includes('/components/')) continue;
+      if (/function\s+markdownToHtml\s*\(/.test(read(f))) hits.push(f);
+    }
+    expect(hits, `Hand-rolled markdownToHtml in components:\n${hits.join('\n')}`).toHaveLength(0);
   });
 
   it('D3: no obvious secrets / tokens committed in source', () => {
@@ -133,6 +144,28 @@ describe('D1–D7 defense matrix', () => {
     for (const s of ['lint', 'typecheck', 'test', 'test:run', 'build']) {
       expect(scripts[s], `missing script: ${s}`).toBeTruthy();
     }
+  });
+
+  it('D8: every src/lib module has a consumer (no dead modules/barrel)', () => {
+    const libDir = join(SRC, 'lib');
+    const modules = readdirSync(libDir).filter(
+      (f) => f.endsWith('.ts') && !f.endsWith('.test.ts'),
+    );
+    const haystack = FILES.map(read).join('\n');
+    const dead: string[] = [];
+    for (const m of modules) {
+      const base = m.replace(/\.ts$/, '');
+      // 被某個非自身檔案以 import 引用：`/<base>` 後接引號
+      const re = new RegExp('/' + base + '["\']');
+      if (!re.test(haystack)) dead.push(m);
+    }
+    expect(dead, `Dead src/lib modules (no consumer):\n${dead.join('\n')}`).toHaveLength(0);
+  });
+
+  it('G5: no regenerable test artifacts at repo root', () => {
+    const ARTIFACTS = ['.vitest-result.json', 'test-results.json'];
+    const present = ARTIFACTS.filter((f) => existsSync(join(ROOT, f)));
+    expect(present, `Regenerable test artifacts present (rm + gitignore): ${present.join(', ')}`).toHaveLength(0);
   });
 });
 

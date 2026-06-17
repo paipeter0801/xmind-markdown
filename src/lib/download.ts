@@ -4,7 +4,7 @@
  * @module lib/download
  */
 
-import { marked } from 'marked';
+import { markdownToHtml as renderMarkdownHtml } from './utils';
 
 /**
  * Download format options
@@ -321,7 +321,7 @@ export function markdownToHtml(
   template: string = DEFAULT_HTML_TEMPLATE,
   css: string = DEFAULT_CSS
 ): string {
-  const htmlContent = marked.parse(markdown) as string;
+  const htmlContent = renderMarkdownHtml(markdown);
   const date = new Date().toLocaleDateString();
 
   return template

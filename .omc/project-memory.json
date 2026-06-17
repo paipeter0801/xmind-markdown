@@ -57,15 +57,33 @@
   },
   "hotPaths": [
     {
+      "path": "src/components/converter/Converter.svelte",
+      "accessCount": 11,
+      "lastAccessed": 1781724487749,
+      "type": "file"
+    },
+    {
+      "path": "src/sw.ts",
+      "accessCount": 10,
+      "lastAccessed": 1781720525258,
+      "type": "file"
+    },
+    {
       "path": "src/components/converter/ResultPanel.svelte",
       "accessCount": 9,
       "lastAccessed": 1781698748972,
       "type": "file"
     },
     {
-      "path": "src/components/converter/Converter.svelte",
-      "accessCount": 7,
-      "lastAccessed": 1781720157748,
+      "path": "package.json",
+      "accessCount": 8,
+      "lastAccessed": 1781721891185,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/guards.test.ts",
+      "accessCount": 8,
+      "lastAccessed": 1781724548345,
       "type": "file"
     },
     {
@@ -75,15 +93,15 @@
       "type": "file"
     },
     {
-      "path": "src/sw.ts",
+      "path": "src/layouts/Layout.astro",
       "accessCount": 6,
-      "lastAccessed": 1781698952289,
+      "lastAccessed": 1781720555364,
       "type": "file"
     },
     {
-      "path": "package.json",
+      "path": "src/lib/utils.ts",
       "accessCount": 6,
-      "lastAccessed": 1781720258377,
+      "lastAccessed": 1781724765387,
       "type": "file"
     },
     {
@@ -93,9 +111,15 @@
       "type": "file"
     },
     {
-      "path": "src/layouts/Layout.astro",
+      "path": "src/lib/index.ts",
       "accessCount": 4,
-      "lastAccessed": 1781720229991,
+      "lastAccessed": 1781720714364,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/download.ts",
+      "accessCount": 4,
+      "lastAccessed": 1781724527180,
       "type": "file"
     },
     {
@@ -105,21 +129,141 @@
       "type": "file"
     },
     {
+      "path": "src/components/converter/TableOfContents.svelte",
+      "accessCount": 3,
+      "lastAccessed": 1781723568061,
+      "type": "file"
+    },
+    {
       "path": "src/lib/markdown-parser.ts",
       "accessCount": 2,
       "lastAccessed": 1781698620451,
       "type": "file"
     },
     {
-      "path": "src/lib/index.ts",
-      "accessCount": 2,
-      "lastAccessed": 1781705209145,
-      "type": "file"
-    },
-    {
       "path": "src/lib/integration.test.ts",
       "accessCount": 2,
       "lastAccessed": 1781705288274,
+      "type": "file"
+    },
+    {
+      "path": "tsconfig.json",
+      "accessCount": 1,
+      "lastAccessed": 1781720386965,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721875866,
+      "type": "file"
+    },
+    {
+      "path": "THINKING.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721900547,
+      "type": "file"
+    },
+    {
+      "path": "references/FIX-LOG-TEMPLATE.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721921705,
+      "type": "file"
+    },
+    {
+      "path": "references/REFLECT-TEMPLATE.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721924881,
+      "type": "file"
+    },
+    {
+      "path": "references/TODO-REVIEW-TEMPLATE.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721928980,
+      "type": "file"
+    },
+    {
+      "path": "references/COMPONENT_PATTERNS.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721936845,
+      "type": "file"
+    },
+    {
+      "path": "02-BUILD-SPEC.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721963446,
+      "type": "file"
+    },
+    {
+      "path": "03-DOC-AND-CODE-REVIEW.md",
+      "accessCount": 1,
+      "lastAccessed": 1781721990500,
+      "type": "file"
+    },
+    {
+      "path": "05-FIX-SPEC.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722002672,
+      "type": "file"
+    },
+    {
+      "path": "06-REFLECT.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722031269,
+      "type": "file"
+    },
+    {
+      "path": "07-ALL-IN-ONE.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722058175,
+      "type": "file"
+    },
+    {
+      "path": "01-CLAUDE.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722094753,
+      "type": "file"
+    },
+    {
+      "path": "04-HARDENING_PROTOCOL.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722156083,
+      "type": "file"
+    },
+    {
+      "path": "ENFORCEMENT_REGISTRY.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722194954,
+      "type": "file"
+    },
+    {
+      "path": "Makefile",
+      "accessCount": 1,
+      "lastAccessed": 1781722213447,
+      "type": "file"
+    },
+    {
+      "path": ".pre-commit-config.yaml",
+      "accessCount": 1,
+      "lastAccessed": 1781722215569,
+      "type": "file"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722409167,
+      "type": "file"
+    },
+    {
+      "path": "TODO-REVIEW.md",
+      "accessCount": 1,
+      "lastAccessed": 1781722984947,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/client-converter.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781723715368,
       "type": "file"
     }
   ],

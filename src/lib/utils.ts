@@ -8,6 +8,32 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { format, formatDistanceToNow } from 'date-fns';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
+/**
+ * 唯一的 markdown→HTML renderer（preview 與匯出共用）。
+ * - 產生與 TableOfContents 相容的 heading id：`heading-{slug}-{counter}`
+ * - 以 DOMPurify 淨化（D2：HTML 注入點前 [MUST] 先淨化）；SSR/build 無 window 時略過
+ */
+function createHeadingIdGenerator(): (text: string) => string {
+  let counter = 0;
+  return (text: string): string => {
+    let cleanText = text.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
+    cleanText = cleanText.replace(/[^\p{L}\p{N}\s-]/gu, '');
+    cleanText = cleanText.trim().replace(/\s+/g, '-').toLowerCase();
+    return `heading-${cleanText}-${++counter}`;
+  };
+}
+
+let _gen: ((text: string) => string) | null = null;
+marked.use({
+  renderer: {
+    heading({ depth, text }: { depth: number; text: string }) {
+      const id = _gen ? _gen(text) : '';
+      return `<h${depth} id="${id}">${text}</h${depth}>\n`;
+    },
+  },
+});
 
 /**
  * Combine Tailwind CSS classes with clsx and tailwind-merge
@@ -139,7 +165,17 @@ export async function copyToClipboard(text: string): Promise<boolean> {
  * @returns HTML string
  */
 export function markdownToHtml(markdown: string): string {
-  return marked.parse(markdown) as string;
+  _gen = createHeadingIdGenerator();
+  try {
+    const raw = marked.parse(markdown, { async: false }) as string;
+    // D2：HTML 注入點 / 匯出前必須淨化；SSR/build 無 window 時略過（內容來源已受控）
+    if (typeof window !== 'undefined') {
+      return DOMPurify.sanitize(raw, { ADD_ATTR: ['id'] });
+    }
+    return raw;
+  } finally {
+    _gen = null;
+  }
 }
 
 /**

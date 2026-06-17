@@ -10,78 +10,9 @@
 	import { MarkdownToXmindConverter } from '../../lib/markdown-to-xmind';
 	import { downloadXmind } from '../../lib/download';
 	import { convertXmindToMarkdown } from '../../lib/client-converter';
+	import { markdownToHtml } from '../../lib/utils';
 
-	// Generate unique ID for headings (uses closure, not reactive state)
-	function createHeadingIdGenerator() {
-		let counter = 0;
-		return (text: string): string => {
-			// Remove leading emoji
-			let cleanText = text.replace(/^[\p{Emoji}\p{Extended_Pictographic}]\s*/u, '');
-			// Remove special characters, keep only letters, numbers, spaces, and hyphens
-			cleanText = cleanText.replace(/[^\p{L}\p{N}\s-]/gu, '');
-			// Trim whitespace
-			cleanText = cleanText.trim();
-			// Convert spaces to hyphens
-			cleanText = cleanText.replace(/\s+/g, '-');
-			// Lowercase the result
-			cleanText = cleanText.toLowerCase();
-			return `heading-${cleanText}-${++counter}`;
-		};
-	}
-
-	// Inline utility functions to avoid import issues
-	function markdownToHtml(markdown: string): string {
-		// Create a new ID generator for each conversion
-		const generateId = createHeadingIdGenerator();
-
-		const lines = markdown.split('\n');
-		const result: string[] = [];
-
-		for (const line of lines) {
-			// Handle headings with IDs
-			const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
-			if (headingMatch) {
-				const level = headingMatch[1].length;
-				const text = headingMatch[2].trim();
-				const id = generateId(text);
-				result.push(`<h${level} id="${id}">${text}</h${level}>`);
-			}
-			// Handle list items with indentation (depth 5+)
-			else if (line.match(/^\s{2,}-\s/)) {
-				const indentMatch = line.match(/^(\s*)-\s(.+)$/);
-				if (indentMatch) {
-					const spaces = indentMatch[1].length;
-					const text = indentMatch[2];
-					const indentLevel = Math.floor(spaces / 2);
-					const marginLeft = `${indentLevel * 1.5}rem`;
-					result.push(`<div style="margin-left: ${marginLeft}" class="list-item">- ${text}</div>`);
-				} else {
-					result.push(line);
-				}
-			}
-			// Handle other markdown syntax
-			else if (line.match(/^\*\*(.*)\*\*/)) {
-				result.push(line.replace(/^\*\*(.*)\*\*/gim, '<strong>$1</strong>'));
-			} else if (line.match(/\*(.*)\*/)) {
-				result.push(line.replace(/\*(.*)\*/gim, '<em>$1</em>'));
-			} else if (line.match(/!\[(.*?)\]\((.*?)\)/)) {
-				result.push(line.replace(/!\[(.*?)\]\((.*?)\)/gim, '<img alt="$1" src="$2" />'));
-			} else if (line.match(/\[(.*?)\]\((.*?)\)/)) {
-				result.push(line.replace(/\[(.*?)\]\((.*?)\)/gim, '<a href="$2">$1</a>'));
-			} else if (line.match(/^> (.*)$/)) {
-				result.push(line.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>'));
-			} else if (line.match(/`(.*?)`/)) {
-				result.push(line.replace(/`(.*?)`/gim, '<code>$1</code>'));
-			} else if (line === '') {
-				// 空行保持為空行（不添加 <br />）
-				result.push('');
-			} else {
-				result.push(line);
-			}
-		}
-
-		return result.join('\n');
-	}
+	// markdownToHtml（含 heading-id + DOMPurify 淨化）來自 utils，為唯一 renderer。
 
 	function downloadFile(content: string, filename: string, mimeType: string) {
 		const blob = new Blob([content], { type: mimeType });

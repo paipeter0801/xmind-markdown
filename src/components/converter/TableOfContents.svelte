@@ -128,7 +128,7 @@
 	})() );
 
 	// Handle click on TOC item
-	function handleItemClick(item: TocItem, event: MouseEvent) {
+	function handleItemClick(item: TocItem, event: MouseEvent | KeyboardEvent) {
 		event.preventDefault();
 
 		// Auto-expand all parents
@@ -290,7 +290,7 @@
 			onkeydown={(e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
 					e.preventDefault();
-					handleItemClick(item, e as any);
+					handleItemClick(item, e);
 				}
 			}}
 			aria-current={isActive ? 'true' : undefined}
