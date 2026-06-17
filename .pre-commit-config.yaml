@@ -1,0 +1,17 @@
+# pre-commit — XMind to Markdown（靜態 Astro PWA）
+# 改寫自 ENGINEERING_GUIDE §2.1，移除 ruff（Python）。執行時間 < 5s，不含單元測試。
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: detect-private-key
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
