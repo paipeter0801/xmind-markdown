@@ -75,15 +75,15 @@
       "type": "file"
     },
     {
-      "path": "package.json",
-      "accessCount": 8,
-      "lastAccessed": 1781721891185,
+      "path": "src/lib/guards.test.ts",
+      "accessCount": 9,
+      "lastAccessed": 1781734099856,
       "type": "file"
     },
     {
-      "path": "src/lib/guards.test.ts",
+      "path": "package.json",
       "accessCount": 8,
-      "lastAccessed": 1781724548345,
+      "lastAccessed": 1781721891185,
       "type": "file"
     },
     {
@@ -105,6 +105,12 @@
       "type": "file"
     },
     {
+      "path": "src/lib/download.ts",
+      "accessCount": 5,
+      "lastAccessed": 1781734135648,
+      "type": "file"
+    },
+    {
       "path": "src/types/converter.ts",
       "accessCount": 4,
       "lastAccessed": 1781696305964,
@@ -114,12 +120,6 @@
       "path": "src/lib/index.ts",
       "accessCount": 4,
       "lastAccessed": 1781720714364,
-      "type": "file"
-    },
-    {
-      "path": "src/lib/download.ts",
-      "accessCount": 4,
-      "lastAccessed": 1781724527180,
       "type": "file"
     },
     {
@@ -144,6 +144,36 @@
       "path": "src/lib/integration.test.ts",
       "accessCount": 2,
       "lastAccessed": 1781705288274,
+      "type": "file"
+    },
+    {
+      "path": "03-DOC-AND-CODE-REVIEW.md",
+      "accessCount": 2,
+      "lastAccessed": 1781734062260,
+      "type": "file"
+    },
+    {
+      "path": "04-HARDENING_PROTOCOL.md",
+      "accessCount": 2,
+      "lastAccessed": 1781734062408,
+      "type": "file"
+    },
+    {
+      "path": "TODO-REVIEW.md",
+      "accessCount": 2,
+      "lastAccessed": 1781734062564,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 2,
+      "lastAccessed": 1781734559375,
+      "type": "file"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "accessCount": 2,
+      "lastAccessed": 1781734583368,
       "type": "file"
     },
     {
@@ -195,12 +225,6 @@
       "type": "file"
     },
     {
-      "path": "03-DOC-AND-CODE-REVIEW.md",
-      "accessCount": 1,
-      "lastAccessed": 1781721990500,
-      "type": "file"
-    },
-    {
       "path": "05-FIX-SPEC.md",
       "accessCount": 1,
       "lastAccessed": 1781722002672,
@@ -225,12 +249,6 @@
       "type": "file"
     },
     {
-      "path": "04-HARDENING_PROTOCOL.md",
-      "accessCount": 1,
-      "lastAccessed": 1781722156083,
-      "type": "file"
-    },
-    {
       "path": "ENFORCEMENT_REGISTRY.md",
       "accessCount": 1,
       "lastAccessed": 1781722194954,
@@ -246,18 +264,6 @@
       "path": ".pre-commit-config.yaml",
       "accessCount": 1,
       "lastAccessed": 1781722215569,
-      "type": "file"
-    },
-    {
-      "path": "CHANGELOG.md",
-      "accessCount": 1,
-      "lastAccessed": 1781722409167,
-      "type": "file"
-    },
-    {
-      "path": "TODO-REVIEW.md",
-      "accessCount": 1,
-      "lastAccessed": 1781722984947,
       "type": "file"
     },
     {

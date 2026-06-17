@@ -4,6 +4,24 @@
 > `(locked: D##)`（對應 `src/lib/guards.test.ts` 的 guard）或 `(human: <理由>)`。
 > 未攜帶 tag = D17 fail。
 
+## [2026-06-18] — Hardening cycle 1（執行 04，消化 TODO-REVIEW）
+
+### Fixed
+- 刪除死碼 `lib/storage.ts` / `lib/shortcuts.ts` / `lib/index.ts` barrel（零消費者，barrel-reexport 模式重演）。 (locked: D8)
+- 收窄 `TableOfContents.svelte` 的 `e as any` → `MouseEvent | KeyboardEvent`，D1 預算降為 0。 (locked: D1)
+- 預覽 `{@html}` 改用單一 renderer（marked + DOMPurify 淨化），移除 `Converter.svelte` 手寫 regex renderer 與 `download.ts` 重複實作。 (locked: D9)
+- 補 `client-converter.ts` 端到端測試（XMind→MD 核心，先前零直接測試）。 (human: 補測試覆蓋，非靜態模式可鎖)
+- 採用跨專案 G5：阻擋可重生測試產物（`.vitest-result.json` 等）誤提交 + `.gitignore`。 (locked: G5)
+- 更新 `README.md` 反映實際棧（移除從未使用的 Shiki、虛構 editor/ 目錄）+ guard 概覽。 (human: 文檔更新)
+
+### Locked
+- D8（dead-module/barrel guard）、D9（single-renderer guard）、G5（test-artifact hygiene）；D1 預算 1→0、D2 注入點現已淨化。
+
+### Human Queue
+- L-001：Header/Footer 仍 `client:load`（Footer 可靜態化，低優先）。 (carry)
+
+---
+
 ## [2026-06-18] — 採用工程框架（適應版）+ 近期重構
 
 ### Added
