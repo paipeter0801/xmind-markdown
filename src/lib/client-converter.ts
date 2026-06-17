@@ -609,12 +609,6 @@ function calculateStats(rootTopic: XmindTopic, startTime: number): ConversionSta
   };
 }
 
-// Export for global access
-if (typeof window !== 'undefined') {
-  // 導出 JSZip 到全局，以便內部使用
-  (window as any).JSZip = JSZip;
+// convertXmindToMarkdown 為具名匯出，由 Converter.svelte 直接 import，
+// 經 Vite 打包後自動產生 content-hash，不再需要手動 ?v= 快取戳記。
 
-  (window as any).XmindConverter = {
-    convertXmindToMarkdown,
-  };
-}

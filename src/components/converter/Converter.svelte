@@ -9,15 +9,7 @@
 	import type { ConversionResult } from '../../types/converter';
 	import { MarkdownToXmindConverter } from '../../lib/markdown-to-xmind';
 	import { downloadXmind } from '../../lib/download';
-
-	// Type for global converter
-	type GlobalConverter = {
-		convertXmindToMarkdown: (
-			file: File | ArrayBuffer,
-			fileName?: string,
-			options?: any
-		) => Promise<ConversionResult>;
-	};
+	import { convertXmindToMarkdown } from '../../lib/client-converter';
 
 	// Generate unique ID for headings (uses closure, not reactive state)
 	function createHeadingIdGenerator() {
@@ -180,19 +172,13 @@
 		onConversionStart?.();
 
 		try {
-			// Check if converter is available
-			const converter = (globalThis as any).XmindConverter as GlobalConverter;
-			if (!converter?.convertXmindToMarkdown) {
-				throw new Error('Converter not loaded. Please refresh the page.');
-			}
-
 			// Read file
 			conversionProgress = 10;
 			const arrayBuffer = await file.arrayBuffer();
 
-			// Convert using global converter
+			// Convert (direct import — Vite hashes the module automatically)
 			conversionProgress = 30;
-			const conversionResult = await converter.convertXmindToMarkdown(arrayBuffer, file.name, {
+			const conversionResult = await convertXmindToMarkdown(arrayBuffer, file.name, {
 				outputFormat: 'markdown',
 				includeMetadata: true,
 				includeIds: false,
