@@ -58,4 +58,4 @@ registerRoute(
 )
 
 // 立即激活新的 service worker
-(self as unknown as ServiceWorkerGlobalScope).skipWaiting()
+self.skipWaiting()
