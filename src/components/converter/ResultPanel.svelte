@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Card from '../ui/Card.svelte';
 	import Button from '../ui/Button.svelte';
+	import TreeView from './TreeView.svelte';
 	import { cn } from '../../lib/utils';
+	import type { XmindTopic } from '../../types/converter';
 
 	interface ConversionStats {
 		totalTopics: number;
@@ -20,6 +22,7 @@
 		sourceFile: string;
 		isLoading?: boolean;
 		class?: string;
+		tree?: XmindTopic | null;
 		onExport?: () => void;
 		onCopy?: () => void;
 	}
@@ -30,12 +33,31 @@
 		sourceFile,
 		isLoading = false,
 		class: className,
+		tree = null,
 		onExport,
 		onCopy
 	}: Props = $props();
 
 	let showStats = $state(false);
 	let copySuccess = $state(false);
+	// 預覽模式：document = 既有標題式預覽；tree = 樹狀階層預覽（凸顯父子關係）
+	let previewMode = $state<'document' | 'tree'>(tree ? 'tree' : 'document');
+	// Tree 模式控制：全部展開/收合、預設展開層數
+	let collapseAllCmd = $state({ tick: 0, expand: true });
+	let collapseBelowDepth = $state(Infinity);
+
+	function expandAll() {
+		collapseAllCmd = { tick: collapseAllCmd.tick + 1, expand: true };
+	}
+	function collapseAll() {
+		collapseAllCmd = { tick: collapseAllCmd.tick + 1, expand: false };
+	}
+	// 調整預設展開層數：重新渲染 TreeView（藉由 key 變動）
+	let treeVersion = $state(0);
+	function applyDepth(d: number) {
+		collapseBelowDepth = d;
+		treeVersion++;
+	}
 
 	async function handleCopy() {
 		if (onCopy) {
@@ -61,7 +83,7 @@
 
 <Card variant="default" class={cn('flex flex-col', className)}>
 	<!-- Header -->
-	<div class="flex items-center justify-between mb-4">
+	<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
 		<h2 class="text-2xl font-semibold flex items-center gap-2 text-slate-900 dark:text-slate-100">
 			<svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -77,9 +99,26 @@
 					d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
 				/>
 			</svg>
-			Markdown Preview
+			{previewMode === 'tree' ? '樹狀階層預覽' : 'Markdown Preview'}
 		</h2>
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-2 flex-wrap">
+			{#if tree}
+				<!-- 預覽模式切換 -->
+				<div class="inline-flex rounded-lg border border-slate-200 dark:border-slate-700 p-0.5 bg-slate-100 dark:bg-slate-800">
+					<button
+						onclick={() => (previewMode = 'document')}
+						class="px-3 py-1 text-sm font-medium rounded-md transition-colors {previewMode === 'document' ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}"
+					>
+						Document
+					</button>
+					<button
+						onclick={() => (previewMode = 'tree')}
+						class="px-3 py-1 text-sm font-medium rounded-md transition-colors {previewMode === 'tree' ? 'bg-white dark:bg-slate-700 text-primary-600 dark:text-primary-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}"
+					>
+						🌲 Tree
+					</button>
+				</div>
+			{/if}
 			<Button
 				variant="outline"
 				size="sm"
@@ -131,6 +170,41 @@
 		</div>
 	</div>
 
+	<!-- Tree 模式工具列 -->
+	{#if previewMode === 'tree' && tree}
+		<div class="flex flex-wrap items-center gap-3 mb-4 px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 text-sm">
+			<button
+				onclick={expandAll}
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+				展開全部
+			</button>
+			<button
+				onclick={collapseAll}
+				class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md font-medium text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 transition-colors"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4m0 0l4 4m-4-4l4-4" /></svg>
+				收合全部
+			</button>
+			<div class="h-4 w-px bg-slate-300 dark:bg-slate-600"></div>
+			<div class="flex items-center gap-2">
+				<span class="text-slate-600 dark:text-slate-400">預設展開層數</span>
+				<span class="font-semibold text-primary-600 dark:text-primary-400 w-8 text-center">
+					{collapseBelowDepth === Infinity ? '全部' : collapseBelowDepth}
+				</span>
+				<input
+					type="range" min="1" max="8" value={collapseBelowDepth === Infinity ? 9 : collapseBelowDepth}
+					oninput={(e) => {
+						const v = +(e.currentTarget as HTMLInputElement).value;
+						applyDepth(v >= 9 ? Infinity : v);
+					}}
+					class="w-28 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-primary-500"
+				/>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Statistics Panel -->
 	{#if showStats}
 		<div class="mb-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 animate-slide-down">
@@ -176,6 +250,10 @@
 					<p class="text-slate-600 dark:text-slate-400">Converting your XMind file...</p>
 				</div>
 			</div>
+		{:else if previewMode === 'tree' && tree}
+			{#key treeVersion}
+				<TreeView node={tree} {collapseBelowDepth} command={collapseAllCmd} />
+			{/key}
 		{:else if content}
 			{@html content}
 		{:else}

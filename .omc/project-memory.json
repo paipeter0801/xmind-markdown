@@ -1,0 +1,103 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1781695101875,
+  "projectRoot": "/home/peter/Code/xmind-markdown",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": {
+      "defaultBranch": "gh-pages",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "_astro": {
+      "path": "_astro",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1781695101773,
+      "keyFiles": [
+        "Converter.DQpMmAG8.js",
+        "Footer.Cxpj4knI.js",
+        "Header.BYg2_hY9.js",
+        "branches.BhnsEkNE.js",
+        "client.svelte.CQiO8I6G.js"
+      ]
+    },
+    "icons": {
+      "path": "icons",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1781695101853,
+      "keyFiles": [
+        "icon.svg"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/components/converter/ResultPanel.svelte",
+      "accessCount": 9,
+      "lastAccessed": 1781698748972,
+      "type": "file"
+    },
+    {
+      "path": "src/types/converter.ts",
+      "accessCount": 4,
+      "lastAccessed": 1781696305964,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/client-converter.ts",
+      "accessCount": 4,
+      "lastAccessed": 1781698622467,
+      "type": "file"
+    },
+    {
+      "path": "src/components/converter/Converter.svelte",
+      "accessCount": 3,
+      "lastAccessed": 1781696256150,
+      "type": "file"
+    },
+    {
+      "path": "src/components/converter/TreeView.svelte",
+      "accessCount": 3,
+      "lastAccessed": 1781698668860,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/markdown-parser.ts",
+      "accessCount": 2,
+      "lastAccessed": 1781698620451,
+      "type": "file"
+    },
+    {
+      "path": "src/sw.ts",
+      "accessCount": 2,
+      "lastAccessed": 1781698621590,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

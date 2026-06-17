@@ -35,7 +35,7 @@ export class MarkdownParser {
    */
   parse(markdown: string): MarkdownNode {
     const lines = markdown.split('\n');
-    let root: MarkdownNode;
+    let root: MarkdownNode | undefined;
     let startIndex = 0;
 
     // Find first h1 heading for root

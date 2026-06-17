@@ -71,6 +71,8 @@ export interface ConversionResult {
   metadata: ConversionMetadata;
   success: boolean;
   error?: string;
+  /** 解析出的主題樹，供樹狀預覽使用（XMind→MD 時存在） */
+  tree?: XmindTopic;
 }
 
 export interface ConversionStats {
@@ -412,6 +414,7 @@ export async function convertXmindToMarkdown(
       stats,
       metadata,
       success: true,
+      tree: rootTopic,
     };
   } catch (error) {
     return {
@@ -527,7 +530,7 @@ function convertTopic(topic: XmindTopic, lines: string[], depth: number, options
 
   // Recursively process children
   if (hasChildren) {
-    for (const child of topic.children) {
+    for (const child of topic.children ?? []) {
       convertTopic(child, lines, depth + 1, options);
     }
   }

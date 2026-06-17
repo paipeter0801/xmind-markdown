@@ -100,6 +100,8 @@ export interface ConversionResult {
   success: boolean;
   /** Error message if conversion failed */
   error?: string;
+  /** 解析出的主題樹，供樹狀預覽使用（XMind→MD 時存在） */
+  tree?: XmindTopic;
 }
 
 /**

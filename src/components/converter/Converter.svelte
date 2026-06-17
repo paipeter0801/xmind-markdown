@@ -457,6 +457,7 @@
 						stats={result.stats}
 						sourceFile={result.metadata.sourceFile}
 						isLoading={isConverting}
+						tree={result.tree}
 						onExport={handleExport}
 						onCopy={handleCopy}
 					/>
