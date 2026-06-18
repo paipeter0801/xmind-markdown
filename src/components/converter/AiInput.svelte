@@ -12,6 +12,7 @@
 	let isGenerating = $state(false);
 	let errorMessage = $state<string | null>(null);
 	let generatedMarkdown = $state('');
+	let resultFontPx = $state(14); // AI 結果字體大小（可調）
 
 	function downloadMarkdownFile(text: string, name: string) {
 		const blob = new Blob([text], { type: 'text/markdown' });
@@ -179,6 +180,20 @@
 				<div class="flex items-center justify-between mb-2">
 					<h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">生成結果（可下載）</h3>
 					<div class="flex items-center gap-2">
+						<!-- 字體大小控制 -->
+						<div class="flex items-center gap-1 mr-1" aria-label="字體大小">
+							<button
+								onclick={() => (resultFontPx = Math.max(11, resultFontPx - 1))}
+								class="w-7 h-7 flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-colors text-xs font-bold"
+								title="字體縮小"
+							>A−</button>
+							<span class="text-xs text-slate-500 dark:text-slate-400 w-6 text-center tabular-nums">{resultFontPx}</span>
+							<button
+								onclick={() => (resultFontPx = Math.min(22, resultFontPx + 1))}
+								class="w-7 h-7 flex items-center justify-center rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-colors text-xs font-bold"
+								title="字體放大"
+							>A+</button>
+						</div>
 						<button
 							onclick={handleDownloadMd}
 							class="px-3 py-1.5 text-xs font-medium rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-800 transition-colors"
@@ -193,7 +208,10 @@
 						</button>
 					</div>
 				</div>
-				<pre class="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono max-h-72 overflow-auto">{generatedMarkdown}</pre>
+				<pre
+					class="text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono"
+					style="font-size: {resultFontPx}px"
+				>{generatedMarkdown}</pre>
 			</div>
 		{/if}
 	</div>
