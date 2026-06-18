@@ -28,9 +28,9 @@
 				</div>
 				<div>
 					<h1 class="text-xl font-bold text-slate-900 dark:text-slate-100">
-						XMind to Markdown
+						AI GoEZ · XMind 工具
 					</h1>
-					<p class="text-xs text-slate-500 dark:text-slate-400">Convert with ease</p>
+					<p class="text-xs text-slate-500 dark:text-slate-400">XMind 8 ⇄ Markdown · 免費・隱私・離線</p>
 				</div>
 			</div>
 

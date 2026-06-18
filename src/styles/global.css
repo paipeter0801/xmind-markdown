@@ -29,6 +29,57 @@
 @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+/* ── AI GoEZ 母站設計 token（僅工具列對齊母站視覺；工具主體配色不變）── */
+:root {
+  --aigoez-blue: oklch(0.60 0.20 250);
+  --aigoez-gradient: linear-gradient(135deg, oklch(0.60 0.20 250) 0%, oklch(0.58 0.24 290) 50%, oklch(0.68 0.20 190) 100%);
+  --aigoez-gradient-text: linear-gradient(135deg, oklch(0.70 0.15 250) 0%, oklch(0.58 0.24 290) 100%);
+}
+.aigoez-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem 0.5rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 1rem;
+  background: #ffffff;
+  border-bottom: 1px solid rgb(226 232 240);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  font-size: 0.875rem;
+}
+.dark .aigoez-toolbar {
+  background: rgb(15 23 42);
+  border-bottom-color: rgb(51 65 85);
+}
+.aigoez-toolbar__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  background: var(--aigoez-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-right: 0.5rem;
+}
+.aigoez-toolbar a {
+  color: rgb(71 85 105);
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.aigoez-toolbar a:hover { background: rgb(241 245 249); color: var(--aigoez-blue); }
+.dark .aigoez-toolbar a { color: rgb(203 213 225); }
+.dark .aigoez-toolbar a:hover { background: rgb(30 41 59); color: rgb(125 211 252); }
+.aigoez-toolbar__back {
+  margin-left: auto;
+  font-weight: 600;
+}
+
 @layer base {
   /* Markdown content styles */
   .prose h1 {

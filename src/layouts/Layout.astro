@@ -89,6 +89,15 @@ import Footer from '../components/layout/Footer.svelte'
     </script>
   </head>
   <body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+    <!-- AI GoEZ 工具列：root 絕對路徑指向母站（掛載於 /xmind-markdown/ 時正確） -->
+    <nav class="aigoez-toolbar" aria-label="AI GoEZ 工具列">
+      <a href="/" class="aigoez-toolbar__logo" aria-label="AI GoEZ 首頁">⚡ AI GoEZ</a>
+      <a href="/xmind-to-markdown/">XMind 轉 Markdown</a>
+      <a href="/ai-mind-map/">AI 心智圖</a>
+      <a href="/privacy/">隱私</a>
+      <a href="/" class="aigoez-toolbar__back">返回 AI GoEZ</a>
+    </nav>
+
     <Header client:load />
 
     <main class="flex-1">

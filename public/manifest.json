@@ -1,7 +1,7 @@
 {
-  "name": "XMind to Markdown",
-  "short_name": "XMind2MD",
-  "description": "Convert XMind files to Markdown with real-time preview",
+  "name": "AI GoEZ · XMind ⇄ Markdown",
+  "short_name": "AI GoEZ",
+  "description": "AI GoEZ 出品：免費、隱私、離線的 XMind 8 ⇄ Markdown 雙向轉換器",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0f172a",
