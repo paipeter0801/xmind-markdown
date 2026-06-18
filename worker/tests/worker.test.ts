@@ -2,6 +2,88 @@ import { describe, it, expect } from 'vitest';
 import { extractOutline } from '../src/outline';
 import { buildUserMessage, SYSTEM_PROMPT } from '../src/prompt';
 import { rateLimit } from '../src/ratelimit';
+import { callLLM, LLMError } from '../src/llm';
+import type { AiEnv } from '../src/llm';
+
+// --- callLLM cascade: Gemini(key2) → Gemini(key3) → Workers AI ---
+
+describe('callLLM cascade', () => {
+  it('uses Gemini key2 when it succeeds', async () => {
+    let calls = 0;
+    const env: AiEnv = { GOOGLE_GEMINI_API2_KEY: 'K2', GOOGLE_GEMINI_API3_KEY: 'K3' };
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      calls++;
+      return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '# T\n- a' }] } }] }), {
+        status: 200,
+      });
+    }) as typeof fetch;
+    try {
+      const out = await callLLM(env, '@cf/qwen/x', 'sys', 'usr');
+      expect(out).toBe('# T\n- a');
+      expect(calls).toBe(1); // 只用 key2，沒動 key3 / Workers
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  it('falls back to key3 when key2 is quota-exhausted (429)', async () => {
+    let geminiCalls = 0;
+    const env: AiEnv = { GOOGLE_GEMINI_API2_KEY: 'K2', GOOGLE_GEMINI_API3_KEY: 'K3' };
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      geminiCalls++;
+      if (geminiCalls === 1) return new Response('rate limited', { status: 429 });
+      return new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: 'ok' }] } }] }), {
+        status: 200,
+      });
+    }) as typeof fetch;
+    try {
+      const out = await callLLM(env, '@cf/qwen/x', 'sys', 'usr');
+      expect(out).toBe('ok');
+      expect(geminiCalls).toBe(2); // key2 失敗 → key3 成功
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  it('falls back to Workers AI when both Gemini keys exhausted', async () => {
+    const env: AiEnv = {
+      GOOGLE_GEMINI_API2_KEY: 'K2',
+      GOOGLE_GEMINI_API3_KEY: 'K3',
+      AI: { run: async () => ({ choices: [{ message: { content: 'from-qwen' } }] }) },
+    };
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async () => new Response('429', { status: 429 })) as typeof fetch;
+    try {
+      const out = await callLLM(env, '@cf/qwen/x', 'sys', 'usr');
+      expect(out).toBe('from-qwen');
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  it('throws AI_QUOTA_EXHAUSTED when all providers exhausted', async () => {
+    const env: AiEnv = {
+      GOOGLE_GEMINI_API2_KEY: 'K2',
+      GOOGLE_GEMINI_API3_KEY: 'K3',
+      AI: { run: async () => { throw new Error('daily limit exceeded'); } },
+    };
+    const orig = globalThis.fetch;
+    globalThis.fetch = (async () => new Response('rate limit', { status: 429 })) as typeof fetch;
+    try {
+      await expect(callLLM(env, '@cf/qwen/x', 'sys', 'usr')).rejects.toMatchObject({
+        code: 'AI_QUOTA_EXHAUSTED',
+      });
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  it('throws AI_UNAVAILABLE with no providers', async () => {
+    await expect(callLLM({}, '@cf/qwen/x', 'sys', 'usr')).rejects.toBeInstanceOf(LLMError);
+  });
+});
 
 describe('prompt', () => {
   it('system prompt mandates H1 + bullet outline', () => {
