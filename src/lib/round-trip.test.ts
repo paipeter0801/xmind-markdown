@@ -10,18 +10,17 @@ import { MarkdownParser } from './markdown-parser';
 import type { MarkdownNode } from '../types/converter';
 
 // 含豐富資料 + 7 層深度（考驗無斷崖）的 outline markdown
+// 備註用行內 <!-- note: ... -->（不碰撞使用者以 📝 為 bullet 的內容）
 const SOURCE_MD = `# ⭐ Root Map
 
-- 🚩 Child A #important
-  - 📝 a note here
+- 🚩 Child A #important <!-- note: a note here -->
   - [Linked Child](https://example.com)
     - Grandchild depth3
       - Great depth4
         - depth5
           - depth6
             - depth7leaf
-- ➡️ Child B #tag-x
-  - 📝 Second note line`;
+- ➡️ Child B #tag-x <!-- note: Second note line -->`;
 
 async function roundTrip(md: string): Promise<MarkdownNode> {
   const xmind = await new MarkdownToXmindConverter().convert(md);
@@ -96,5 +95,28 @@ describe('XMind ↔ Markdown lossless round-trip', () => {
     const after = await roundTrip(SOURCE_MD);
     const count = (n: MarkdownNode): number => 1 + (n.children || []).reduce((s, c) => s + count(c), 0);
     expect(count(after)).toBe(count(before));
+  });
+});
+
+describe('📝-bullet regression (content must NOT be swallowed as a note)', () => {
+  it('treats a 📝-prefixed child bullet as a normal node, not a note', () => {
+    const md = `# 應用場景
+- 學習與教育
+  - 📝 語言練習、概念解釋、程式碼教學`;
+    const tree = new MarkdownParser().parse(md);
+    const learn = find(tree, '學習與教育');
+    expect(learn, '學習與教育 should exist').toBeDefined();
+    expect(learn!.children?.length, 'should have 1 child').toBe(1);
+    // 📝 內容應保留為子節點標題，不得被吞為備註
+    expect(learn!.children![0].content).toBe('📝 語言練習、概念解釋、程式碼教學');
+    expect(learn!.notes).toBeUndefined();
+  });
+
+  it('inline <!-- note: ... --> still round-trips as a note', async () => {
+    const md = `# 根\n\n- 子節點 <!-- note: 這是一段備註 -->`;
+    const after = await roundTrip(md);
+    const child = after.children?.[0];
+    expect(child?.content).toBe('子節點');
+    expect(child?.notes).toBe('這是一段備註');
   });
 });

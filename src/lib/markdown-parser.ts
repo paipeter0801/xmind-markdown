@@ -16,15 +16,24 @@ interface ParserOptions {
   preserveHeadingNumbers?: boolean;
 }
 
-/** 把一行主體解析成 {title, markers, links, labels}（與匯出 richTitle 對稱）。 */
+/** 把一行主體解析成 {title, markers, links, labels, note?}（與匯出 richTitle/noteComment 對稱）。 */
 function parseRich(raw: string): {
   title: string;
   markers: string[];
   links: Array<{ text: string; url: string }>;
   labels: string[];
+  note?: string;
 } {
-  const { ids: markers, rest: r1 } = extractLeadingEmojis(raw);
-  let rest = r1;
+  let rest = raw;
+  let note: string | undefined;
+  // 行內 HTML 註解備註：`<!-- note: ... -->`（匯出端編碼；`—` 還原回 `--`）
+  const noteMatch = rest.match(/<!--\s*note:\s*([\s\S]*?)\s*-->/i);
+  if (noteMatch) {
+    note = noteMatch[1].replace(/—/g, '--').trim();
+    rest = rest.replace(/<!--\s*note:\s*[\s\S]*?-->/i, '');
+  }
+  const { ids: markers, rest: r1 } = extractLeadingEmojis(rest);
+  rest = r1;
   const labels: string[] = [];
   // 結尾 #tag（空格分隔；底線還原為空白）
   rest = rest.replace(/(?:\s|^)(#[^\s#]+)/g, (_m, tag: string) => {
@@ -37,10 +46,16 @@ function parseRich(raw: string): {
     links.push({ text: t, url: u });
     return t;
   });
-  return { title: rest.trim(), markers, links, labels };
+  const out: { title: string; markers: string[]; links: Array<{ text: string; url: string }>; labels: string[]; note?: string } = {
+    title: rest.trim(),
+    markers,
+    links,
+    labels,
+  };
+  if (note) out.note = note;
+  return out;
 }
 
-const NOTE_SENTINEL = '📝';
 const IMAGE_RE = /^!\[([^\]]*)\]\(([^)]+)\)$/;
 
 export class MarkdownParser {
@@ -64,6 +79,7 @@ export class MarkdownParser {
         if (rich.markers.length) root.markers = rich.markers;
         if (rich.links.length) root.links = rich.links;
         if (rich.labels.length) root.labels = rich.labels;
+        if (rich.note) root.notes = rich.note;
         startIndex = i + 1;
         break;
       }
@@ -76,13 +92,7 @@ export class MarkdownParser {
     const stack: { node: MarkdownNode; indent: number }[] = [{ node: root, indent: -1 }];
 
     const attachRichBody = (parent: MarkdownNode, body: MarkdownNode) => {
-      // 📝 note child → 父節點備註
-      if (body.content.startsWith(NOTE_SENTINEL + ' ')) {
-        const noteLine = body.content.slice(NOTE_SENTINEL.length + 1).trim();
-        parent.notes = parent.notes ? parent.notes + '\n' + noteLine : noteLine;
-        return true;
-      }
-      // image child → 父節點附件
+      // image child → 父節點附件（備註已改為行內 <!-- note: --> 不再走子 bullet）
       const img = body.content.match(IMAGE_RE);
       if (img) {
         if (!parent.attachments) parent.attachments = [];
@@ -116,6 +126,7 @@ export class MarkdownParser {
         if (rich.markers.length) node.markers = rich.markers;
         if (rich.links.length) node.links = rich.links;
         if (rich.labels.length) node.labels = rich.labels;
+        if (rich.note) node.notes = rich.note;
         const depthIndent = Math.max(0, (level - 1) * 2); // h2→0, h3→2, ...
         while (stack.length > 1 && stack[stack.length - 1].indent >= depthIndent) stack.pop();
         const parent = stack[stack.length - 1].node;
@@ -133,6 +144,7 @@ export class MarkdownParser {
         if (rich.markers.length) node.markers = rich.markers;
         if (rich.links.length) node.links = rich.links;
         if (rich.labels.length) node.labels = rich.labels;
+        if (rich.note) node.notes = rich.note;
 
         // pop 到正確父層（縮排嚴格小於當前者）
         while (stack.length > 1 && stack[stack.length - 1].indent >= indent) stack.pop();

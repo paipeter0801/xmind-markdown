@@ -479,9 +479,9 @@ function topicTreeToMarkdown(rootTopic: XmindTopic, options: ConversionOptions):
   const lines: string[] = [];
 
   // Root 永遠是 h1（兩種模式皆然，供匯入端識別根）
-  lines.push(`# ${richTitle(rootTopic)}`);
+  lines.push(`# ${richTitle(rootTopic)}${noteComment(rootTopic)}`);
   lines.push('');
-  emitRichBody(rootTopic, '  ', lines); // root 的備註/圖片置於根下方
+  emitRichBody(rootTopic, '  ', lines); // root 的圖片置於根下方
 
   if (options.includeMetadata) {
     lines.push('<!--');
@@ -518,15 +518,20 @@ function richTitle(topic: XmindTopic): string {
 }
 
 /**
- * 在主題下方（childIndent）輸出備註與圖片。
- * 備註編碼：`{childIndent}- 📝 {note}`（多行以 ` / ` 接合；匯入端反向還原）。
- * 圖片：`{childIndent}- ![filename](path)`（二進位內容仍需 .xmind，markdown 僅留參考）。
+ * 備註以「行內 HTML 註解」附在主題同一行：` <!-- note: {text} -->`。
+ * 不使用 `📝 ` 子 bullet（會和使用者以 📝 為 bullet 裝飾的真實內容碰撞而被吞掉）。
+ * HTML 註解不會被渲染、不會被當成節點，往返無碰撞；`--` 暫換為 `—` 避免提前結束註解。
+ */
+function noteComment(topic: XmindTopic): string {
+  if (!topic.notes) return '';
+  const note = topic.notes.replace(/\r?\n+/g, ' ').replace(/--/g, '—').trim();
+  return note ? ` <!-- note: ${note} -->` : '';
+}
+
+/**
+ * 在主題下方（childIndent）輸出圖片／附件（以子 bullet 編碼；二進位內容仍需 .xmind）。
  */
 function emitRichBody(topic: XmindTopic, childIndent: string, lines: string[]): void {
-  if (topic.notes) {
-    const note = topic.notes.replace(/\r?\n+/g, ' / ').trim();
-    if (note) lines.push(`${childIndent}- 📝 ${note}`);
-  }
   if (topic.attachments && topic.attachments.length > 0) {
     for (const a of topic.attachments) {
       if (a.type === 'image') lines.push(`${childIndent}- ![${a.filename}](${a.path})`);
@@ -543,12 +548,12 @@ function emitRichBody(topic: XmindTopic, childIndent: string, lines: string[]): 
 function emitTopic(topic: XmindTopic, depth: number, lines: string[], mode: 'outline' | 'headings'): void {
   if (mode === 'headings' && depth <= 5) {
     const hashes = '#'.repeat(depth + 1); // depth1→h2 ... depth5→h6
-    lines.push(`${hashes} ${richTitle(topic)}`);
+    lines.push(`${hashes} ${richTitle(topic)}${noteComment(topic)}`);
     emitRichBody(topic, '  ', lines);
     for (const child of topic.children ?? []) emitTopic(child, depth + 1, lines, mode);
   } else {
     const indent = '  '.repeat(Math.max(0, depth - 1)); // outline: depth1→0；headings depth6+→0
-    lines.push(`${indent}- ${richTitle(topic)}`);
+    lines.push(`${indent}- ${richTitle(topic)}${noteComment(topic)}`);
     emitRichBody(topic, indent + '  ', lines);
     for (const child of topic.children ?? []) emitTopic(child, depth + 1, lines, mode);
   }
