@@ -101,6 +101,8 @@ export interface ConversionOptions {
   skipEmpty?: boolean;
   preserveFormatting?: boolean;
   maxDepth?: number;
+  /** XMind→MD 匯出模式：outline=全巢狀 bullet（任意深度、無損往返預設）；headings=h1-h6+深層 bullet（文件感，深度>6 非無損） */
+  exportMode?: 'outline' | 'headings';
 }
 
 // Parser class
@@ -467,15 +469,14 @@ async function extractXmindContent(file: File | ArrayBuffer): Promise<string> {
 }
 
 function topicTreeToMarkdown(rootTopic: XmindTopic, options: ConversionOptions): string {
+  const mode = options.exportMode ?? 'outline';
   const lines: string[] = [];
 
-  // Root level processing starts from depth 1
-  const rootText = sanitizeTitle(rootTopic.title);
-  const rootEmoji = rootTopic.markers?.[0] ? `${rootTopic.markers[0]} ` : '';
-  lines.push(`# ${rootEmoji}${rootText}`);
+  // Root 永遠是 h1（兩種模式皆然，供匯入端識別根）
+  lines.push(`# ${richTitle(rootTopic)}`);
   lines.push('');
+  emitRichBody(rootTopic, '  ', lines); // root 的備註/圖片置於根下方
 
-  // Add metadata if requested
   if (options.includeMetadata) {
     lines.push('<!--');
     lines.push(`Generated: ${new Date().toISOString()}`);
@@ -485,54 +486,65 @@ function topicTreeToMarkdown(rootTopic: XmindTopic, options: ConversionOptions):
     lines.push('');
   }
 
-  // Convert children recursively (start at depth 2)
   if (rootTopic.children && rootTopic.children.length > 0) {
     for (const child of rootTopic.children) {
-      convertTopic(child, lines, 2, options);
+      emitTopic(child, 1, lines, mode);
     }
   }
 
   return lines.join('\n');
 }
 
-function convertTopic(topic: XmindTopic, lines: string[], depth: number, options: ConversionOptions): void {
-  const text = sanitizeTitle(topic.title);
-  const emoji = topic.markers?.[0] ? `${topic.markers[0]} ` : '';
-  const hasChildren = topic.children && topic.children.length > 0;
+/**
+ * 主題的「富標題」：{markers} {title}{inline link}{ #labels}。
+ * 與 markdown-parser 的匯入契約對稱（marker emojis / [text](url) / #tag 皆可逆解析）。
+ */
+function richTitle(topic: XmindTopic): string {
+  const emoji = topic.markers && topic.markers.length > 0 ? `${topic.markers.join(' ')} ` : '';
+  let title = sanitizeTitle(topic.title);
+  const link = topic.links?.find((l) => l.type === 'url' || l.type === 'file');
+  if (link) title = `[${title}](${link.href})`;
+  const tags =
+    topic.labels && topic.labels.length > 0
+      ? ' ' + topic.labels.map((l) => '#' + l.replace(/\s+/g, '_')).join(' ')
+      : '';
+  return `${emoji}${title}${tags}`;
+}
 
-  // Python logic:
-  // depth 2: ## title
-  // depth 3: ### title
-  // depth 4: #### title
-  // depth 5+: - title (list format)
-
-  if (depth === 2) {
-    lines.push(`## ${emoji}${text}`);
-    lines.push('');
-  } else if (depth === 3) {
-    lines.push(`### ${emoji}${text}`);
-    if (!hasChildren) {
-      lines.push('');
-    }
-  } else if (depth === 4) {
-    // depth 4 - heading format for TOC support
-    lines.push(`#### ${emoji}${text}`);
-    if (!hasChildren) {
-      lines.push('');
-    }
-  } else {
-    // depth 5+ - list format
-    const indent = '  '.repeat(depth - 5);
-    // 將結尾的中文冒號替換為英文冒號（如果有）
-    const cleanText = text.replace(/：$/g, ':');
-    lines.push(`${indent}- ${emoji}${cleanText}`);
+/**
+ * 在主題下方（childIndent）輸出備註與圖片。
+ * 備註編碼：`{childIndent}- 📝 {note}`（多行以 ` / ` 接合；匯入端反向還原）。
+ * 圖片：`{childIndent}- ![filename](path)`（二進位內容仍需 .xmind，markdown 僅留參考）。
+ */
+function emitRichBody(topic: XmindTopic, childIndent: string, lines: string[]): void {
+  if (topic.notes) {
+    const note = topic.notes.replace(/\r?\n+/g, ' / ').trim();
+    if (note) lines.push(`${childIndent}- 📝 ${note}`);
   }
-
-  // Recursively process children
-  if (hasChildren) {
-    for (const child of topic.children ?? []) {
-      convertTopic(child, lines, depth + 1, options);
+  if (topic.attachments && topic.attachments.length > 0) {
+    for (const a of topic.attachments) {
+      if (a.type === 'image') lines.push(`${childIndent}- ![${a.filename}](${a.path})`);
+      else lines.push(`${childIndent}- 📎 [${a.filename}](${a.path})`);
     }
+  }
+}
+
+/**
+ * 遞迴輸出主題。
+ * outline（預設/無損往返）：root 後所有後代為縮排巢狀 bullet（indent = 2*(depth-1)），任意深度無斷崖。
+ * headings：depth 1-5 → h2-h6；depth 6+ → 巢狀 bullet（非完全無損，文件感用）。
+ */
+function emitTopic(topic: XmindTopic, depth: number, lines: string[], mode: 'outline' | 'headings'): void {
+  if (mode === 'headings' && depth <= 5) {
+    const hashes = '#'.repeat(depth + 1); // depth1→h2 ... depth5→h6
+    lines.push(`${hashes} ${richTitle(topic)}`);
+    emitRichBody(topic, '  ', lines);
+    for (const child of topic.children ?? []) emitTopic(child, depth + 1, lines, mode);
+  } else {
+    const indent = '  '.repeat(Math.max(0, depth - 1)); // outline: depth1→0；headings depth6+→0
+    lines.push(`${indent}- ${richTitle(topic)}`);
+    emitRichBody(topic, indent + '  ', lines);
+    for (const child of topic.children ?? []) emitTopic(child, depth + 1, lines, mode);
   }
 }
 

@@ -76,6 +76,7 @@ export class XmindBuilder {
    * @returns Topic inner XML string (title, links, markers)
    */
   private buildTopicContent(node: MarkdownNode, topicId: string): string {
+    void topicId;
     let xml = '';
 
     // Add title with optional SVG width attribute for long content
@@ -85,10 +86,27 @@ export class XmindBuilder {
       xml += `<title>${this.escapeXml(node.content)}</title>`;
     }
 
+    // Marker refs（無損往返：markers 還原為 marker-refs）
+    if (node.markers && node.markers.length > 0) {
+      const refs = node.markers.map((id) => `<marker-ref marker-id="${this.escapeXml(id)}"/>`).join('');
+      xml += `<marker-refs>${refs}</marker-refs>`;
+    }
+
+    // Labels（無損往返）
+    if (node.labels && node.labels.length > 0) {
+      const labels = node.labels.map((l) => `<label>${this.escapeXml(l)}</label>`).join('');
+      xml += `<labels>${labels}</labels>`;
+    }
+
     // Add hyperlink if present
     if (this.options.includeLinks && node.links && node.links.length > 0) {
       const link = node.links[0];
       xml += `<xhtml:link xlink:href="${this.escapeXml(link.url)}"/>`;
+    }
+
+    // Notes（無損往返：plain-text）
+    if (node.notes) {
+      xml += `<notes><plain-text>${this.escapeXml(node.notes)}</plain-text></notes>`;
     }
 
     return xml;

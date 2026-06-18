@@ -59,6 +59,14 @@ export interface MarkdownNode {
   children?: MarkdownNode[];
   /** Links found in content */
   links?: Array<{ text: string; url: string }>;
+  /** Marker IDs recovered from leading emoji（無損往返） */
+  markers?: string[];
+  /** Note text（無損往返；多行以 ` / ` 編碼，匯入還原為換行） */
+  notes?: string;
+  /** Labels recovered from `#tag` suffixes */
+  labels?: string[];
+  /** Attachments recovered from `![](path)` children */
+  attachments?: Array<{ filename: string; path: string; type: string }>;
   /** Line number in source Markdown */
   line?: number;
 }
