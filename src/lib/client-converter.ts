@@ -120,18 +120,18 @@ class XmindParser {
       parseAttributeValue: false, // 關閉以避免問題
       parseTagValue: false,
       isArray: (name: string) => {
+        // 注意：容器元素（marker-refs / labels / notes）保持「單一物件」，
+        // 只讓內部可重複的子元素（marker-ref / label / plain-text）為陣列，
+        // 才能與 extractMarkers/extractLabels/extractNotes 的存取形狀一致。
         return [
           'topic',
           'topics',
           'children',
           'marker-ref',
-          'marker-refs',
           'sheet',
           'attachment',
           'hyperlink',
           'label',
-          'labels',
-          'notes',
           'plain-text',
           'rich-content',
         ].includes(name);
@@ -287,8 +287,14 @@ class XmindParser {
 
   private extractLinks(topic: any): Array<{ href: string; type: string; title?: string }> {
     const links: Array<{ href: string; type: string; title?: string }> = [];
-    // 支持帶或不帶前綴的 href 屬性
-    const href = topic['href'] || topic['@_href'];
+    // 支援：topic 屬性 href / xlink:href，或子元素 <xhtml:link xlink:href="...">（builder 產出的形式）
+    const linkEl = topic['xhtml:link'];
+    const href =
+      topic['href'] ||
+      topic['xlink:href'] ||
+      topic['@_href'] ||
+      linkEl?.['xlink:href'] ||
+      linkEl?.['href'];
     if (href) {
       let type: 'url' | 'file' | 'topic' = 'url';
       if (href.startsWith('#')) {
@@ -302,10 +308,10 @@ class XmindParser {
   }
 
   private extractNotes(topic: any): string | undefined {
-    if (topic.notes?.['plain-text']) {
-      return topic.notes['plain-text'];
-    }
-    return undefined;
+    const pt = topic.notes?.['plain-text'];
+    if (pt === undefined || pt === null) return undefined;
+    // plain-text 在 isArray 名單中 → 一律為陣列；多行還原為換行
+    return Array.isArray(pt) ? pt.join('\n') : String(pt);
   }
 
   private extractLabels(topic: any): string[] {

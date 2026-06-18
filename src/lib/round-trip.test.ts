@@ -21,7 +21,7 @@ const SOURCE_MD = `# ⭐ Root Map
           - depth6
             - depth7leaf
 - ➡️ Child B #tag-x
-  - Second note line`;
+  - 📝 Second note line`;
 
 async function roundTrip(md: string): Promise<MarkdownNode> {
   const xmind = await new MarkdownToXmindConverter().convert(md);

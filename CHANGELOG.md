@@ -4,6 +4,31 @@
 > `(locked: D##)`（對應 `src/lib/guards.test.ts` 的 guard）或 `(human: <理由>)`。
 > 未攜帶 tag = D17 fail。
 
+## [2026-06-18] — 無損往返 XMind↔MD（商業級匯出/匯入重做）
+
+### Added
+- XMind→MD 匯出 `exportMode`：`outline`（預設，root=# + 後代縮排巢狀 bullet，**任意深度無斷崖**）/ `headings`（h1-h6 用滿 + 深層 bullet）。
+- 共享 marker 模組 `lib/markers.ts`（id↔emoji 雙向，最長匹配/碰撞優先序），雙向一致。
+- 匯出 rich emit：備註（`📝 ` 子 bullet）、連結（inline `[text](url)`）、標籤（`#tag`）、marker emoji、圖片（`![](path)`）——先前全部丟失。
+- 匯入 `markdown-parser.ts` 重寫：**縮排感知** list→巢狀 children（往返關鍵）、還原 marker/label/link/note、`📝 `/`![]()` sentinel 附加回父節點。
+- `xmind-builder.ts` emit marker-refs / labels / notes（plain-text）進 XML。
+- `round-trip.test.ts`：MD→XMind→MD 雙向無損測試（結構/深度/markers/labels/links/notes 簽章等價 + level-7 無斷崖 + 節點數守恆）。
+
+### Fixed
+- 匯出端無聲丟失 notes/links/labels/attachments（只 emit title+marker）→ 補齊 rich emit。 (human: 行為修復，由 round-trip.test.ts 防回歸，非靜態 pattern guard)
+- `client-converter` XMLParser `isArray` 把 marker-refs/labels/notes 強制成陣列，但 extract* 當單一物件存取 → 全部取不到（既有潛伏 bug，舊匯出丟棄這些欄目所以從未爆）。修正為容器保持單一物件。 (human: extraction bug，round-trip.test.ts 防回歸)
+- `extractLinks` 只讀 topic.href 屬性，讀不到 builder 產生的 `<xhtml:link xlink:href>` → 增援該形狀。 (human: extraction bug，round-trip.test.ts 防回歸)
+- `extractNotes`：plain-text 為陣列時 join 還原換行。 (human: extraction bug，round-trip.test.ts 防回歸)
+- 深度斷崖：depth 5+ flush-left bullet（失父層脈絡、浪費 h5/h6）→ outline 無斷崖 / headings 用滿 h1-h6。 (human: 匯出表現修復)
+
+### Locked
+- 無損往返由 `round-trip.test.ts`（CI 每次 `npm test` 必跑）守護；結構+markers+labels+links+notes 雙向等價。
+
+### Human Queue
+- 已知 markdown 硬限制：多行備註以 ` / ` 編碼（單行完全無損）；附件二進位內容仍需 .xmind（MD 僅留參考）；headings 模式深度>6 非完全無損（outline 才是無損預設）。 (carry)
+
+---
+
 ## [2026-06-18] — Hardening cycle 1（執行 04，消化 TODO-REVIEW）
 
 ### Fixed
