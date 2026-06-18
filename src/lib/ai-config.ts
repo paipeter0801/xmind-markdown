@@ -7,6 +7,6 @@
  *
  * 隱私線：AI 只處理使用者在此模式「主動輸入」的文字，不碰上傳的 .xmind。
  */
-export const AI_API_URL = '';
+export const AI_API_URL = 'https://xmind-markdown-ai.murmurnoteapp.workers.dev';
 
 export const AI_ENABLED = AI_API_URL.trim().length > 0;
