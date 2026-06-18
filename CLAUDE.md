@@ -46,3 +46,18 @@ make ci              # lint + test + build（CI 等效）
 - [MUST] 預覽的樹狀結構（TreeView）直接取自 converter 回傳的 `tree`，[NEVER] 從 markdown 字串反解。
 - [NEVER] 把 `public/client-converter.js` 或手動 `?v=` 快取戳記加回來（converter 已併入 Vite 模組圖，自動 content-hash）。
 - [ALWAYS] 修改 SW（`src/sw.ts`）後，記得更新體驗：`clients.claim` + `Layout.astro` 的 update toast 已就位。
+
+
+## Dev Brain (Development Experience Database)
+
+You have access to the `dev-brain` MCP server — a shared knowledge base of development experiences.
+
+**Mandatory behaviors:**
+
+1. **When you encounter a bug, error, or performance issue:** Call `search_experience` with a description of the problem BEFORE attempting to fix it. Learn from past solutions.
+
+2. **After you successfully solve a non-trivial problem:** Call `record_experience` to save what you learned. Include a clear problem description, the solution, relevant tags, and context.
+
+3. **Tags should be lowercase and specific:** e.g., `["bugfix", "python", "flask"]`, `["perf", "sql", "postgresql"]`, `["refactor", "react"]`
+
+**When in doubt, record it.** It is better to have too many experiences than to lose institutional knowledge.
