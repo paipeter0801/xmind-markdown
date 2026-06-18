@@ -9,7 +9,9 @@
 #
 set -uo pipefail
 
-ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+# 以「腳本自身位置」定位 xmind-markdown repo 根目錄（腳本在 scripts/ 下）。
+# 不用 git rev-parse——從別的 repo（如 aigoez 的 make）呼叫時，cwd 的 git root 會指錯。
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 fail=0
