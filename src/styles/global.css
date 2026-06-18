@@ -1,5 +1,10 @@
 @import "tailwindcss";
-@import "./dark.css";
+
+/* Tailwind v4 原生 class-based dark mode。
+ * v4 不會自動載入 tailwind.config.js 的 darkMode:'class'，必須在此明確宣告，
+ * 否則 dark: 預設走 prefers-color-scheme（媒體），且手寫 dark.css 補不完
+ * 帶透明度的類別（如 dark:bg-slate-900/50），導致深色模式部分區塊背景失效。 */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * v4 原生 @theme：註冊 primary 色票 + 動畫。
