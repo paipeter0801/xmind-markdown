@@ -1,0 +1,21 @@
+name = "xmind-markdown-ai"
+main = "src/index.ts"
+compatibility_date = "2026-06-04"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers AI binding — [MUST] 部署前確認帳號已啟用 Workers AI
+[ai]
+binding = "AI"
+
+# 環境變數：[MUST] 部署時以 `wrangler secret put` 或下方 vars 設定
+# ALLOWED_ORIGINS = "https://paipeter0801.github.io,https://你的自訂域"
+[vars]
+ALLOWED_ORIGINS = "http://localhost:4321,http://127.0.0.1:4321"
+# 每個 origin 每分鐘最大請求數（in-memory 限流，軟性，付費段再換配額）
+RATE_LIMIT_PER_MIN = "10"
+# AI 模式預設模型（murmurnote 同款 qwen）
+AI_MODEL = "@cf/qwen/qwen3-30b-a3b-fp8"
+
+# OBSERVABILITY
+[observability]
+enabled = true

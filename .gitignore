@@ -44,6 +44,11 @@ test-results.json
 coverage/
 .vitest-cache/
 
+# AI worker（獨立 Cloudflare Worker，自有 toolchain）
+worker/node_modules/
+worker/.wrangler/
+worker/.dev.vars
+
 # Misc
 *.tgz
 

@@ -5,6 +5,7 @@
 	import ProgressBar from './ProgressBar.svelte';
 	import TableOfContents from './TableOfContents.svelte';
 	import MarkdownInput from './MarkdownInput.svelte';
+	import AiInput from './AiInput.svelte';
 	import Button from '../ui/Button.svelte';
 	import type { ConversionResult } from '../../types/converter';
 	import { MarkdownToXmindConverter } from '../../lib/markdown-to-xmind';
@@ -69,7 +70,7 @@
 	let errorMessage = $state<string | null>(null);
 	let tocMaxDepth = $state(5); // 預設顯示 5 層目錄
 	let showToc = $state(true); // 是否顯示目錄
-	let inputMode = $state<'file' | 'text'>('file');
+	let inputMode = $state<'file' | 'text' | 'ai'>('file');
 
 	async function handleFileSelect(files: File[]) {
 		if (files.length === 0) return;
@@ -243,6 +244,13 @@
 		>
 			Text Input
 		</Button>
+		<Button
+			variant={inputMode === 'ai' ? 'primary' : 'outline'}
+			size="sm"
+			onclick={() => (inputMode = 'ai')}
+		>
+			🤖 AI Help
+		</Button>
 	</div>
 
 	<!-- Upload Section -->
@@ -300,8 +308,10 @@
 				</div>
 			{/if}
 		{/if}
-	{:else}
+	{:else if inputMode === 'text'}
 		<MarkdownInput />
+	{:else}
+		<AiInput />
 	{/if}
 	</section>
 

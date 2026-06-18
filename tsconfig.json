@@ -8,5 +8,6 @@
       "@/*": ["./src/*"]
     },
     "types": ["astro/client"]
-  }
+  },
+  "exclude": ["worker", "dist", ".astro"]
 }

@@ -6,6 +6,7 @@ All conversion runs in the browser — no file ever leaves the device. Installab
 ## Features
 
 - **Bidirectional**: drag a `.xmind` → Markdown; drag a `.md` → `.xmind`
+- **AI Help** (freemium): type a topic + your raw thoughts → AI generates a mind-map outline, downloadable as `.xmind` / `.md`. Runs on a separate Cloudflare Worker (Workers AI / qwen); **never touches your uploaded `.xmind` files**.
 - **Tree preview**: collapsible outline view (Document / 🌲 Tree toggle) that mirrors the XMind hierarchy
 - Real-time Markdown preview with table of contents
 - Dark mode

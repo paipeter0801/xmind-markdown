@@ -4,6 +4,21 @@
 > `(locked: D##)`（對應 `src/lib/guards.test.ts` 的 guard）或 `(human: <理由>)`。
 > 未攜帶 tag = D17 fail。
 
+## [2026-06-18] — AI Help（freemium 引擎段，不含付費）
+
+### Added
+- **AI Help 模式**（第三個輸入分頁）：使用者輸入主題 + 純文字 → LLM 生成 outline markdown → 可下載 `.xmind` / `.md`。沿用無損往返管線（AI 只吐 outline md，既有 MD→XMind 接手）。
+- **獨立 Cloudflare Worker**（`worker/`，雙站 B 模式）：Hono + Zod + per-origin CORS 白名單 + Workers AI（qwen3-30b，仿 murmurnote）+ 格式驗證/修復/重試 + in-memory 限流。10 個 worker 測試（prompt/outline/ratelimit 純函數）。
+- 前端 `AiInput.svelte`（UI 仿 MarkdownInput）+ `ai-client.ts`/`ai-config.ts`。明確隱私提示：AI 只吃本模式輸入的文字，不碰上傳的 `.xmind`。
+- `worker/DEPLOY.md`（你的 wrangler deploy 步驟、allowed_origins、[ai] binding）。
+
+### Human Queue
+- AI endpoint 需你部署 worker 並填 `AI_API_URL` 才啟用（程式碼已就緒、未填則顯示「未啟用」、免費轉換不受影響）。 (carry)
+- 付費/贊助制（LemonSqueezy，參考 jp-heartgui-dev）為後續，本階段未接。 (carry)
+- Worker typecheck/test 在 `worker/` 子目錄獨立執行；主 tsconfig 已 exclude worker/。 (human: 雙 toolchain 隔離)
+
+---
+
 ## [2026-06-18] — 無損往返 XMind↔MD（商業級匯出/匯入重做）
 
 ### Added
