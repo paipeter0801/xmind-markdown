@@ -58,8 +58,14 @@
   "hotPaths": [
     {
       "path": "src/components/converter/Converter.svelte",
-      "accessCount": 11,
-      "lastAccessed": 1781724487749,
+      "accessCount": 17,
+      "lastAccessed": 1781753762672,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/client-converter.ts",
+      "accessCount": 12,
+      "lastAccessed": 1781749993656,
       "type": "file"
     },
     {
@@ -78,12 +84,6 @@
       "path": "src/lib/guards.test.ts",
       "accessCount": 9,
       "lastAccessed": 1781734099856,
-      "type": "file"
-    },
-    {
-      "path": "src/lib/client-converter.ts",
-      "accessCount": 9,
-      "lastAccessed": 1781738748082,
       "type": "file"
     },
     {
@@ -123,6 +123,12 @@
       "type": "file"
     },
     {
+      "path": "CHANGELOG.md",
+      "accessCount": 4,
+      "lastAccessed": 1781753891449,
+      "type": "file"
+    },
+    {
       "path": "src/components/converter/TreeView.svelte",
       "accessCount": 3,
       "lastAccessed": 1781698668860,
@@ -138,6 +144,12 @@
       "path": "src/lib/markdown-parser.ts",
       "accessCount": 3,
       "lastAccessed": 1781738899046,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 3,
+      "lastAccessed": 1781753912580,
       "type": "file"
     },
     {
@@ -165,27 +177,21 @@
       "type": "file"
     },
     {
-      "path": "README.md",
-      "accessCount": 2,
-      "lastAccessed": 1781734559375,
-      "type": "file"
-    },
-    {
-      "path": "CHANGELOG.md",
-      "accessCount": 2,
-      "lastAccessed": 1781734583368,
-      "type": "file"
-    },
-    {
       "path": "src/lib/markers.ts",
       "accessCount": 2,
       "lastAccessed": 1781738646819,
       "type": "file"
     },
     {
+      "path": "src/lib/round-trip.test.ts",
+      "accessCount": 2,
+      "lastAccessed": 1781750037081,
+      "type": "file"
+    },
+    {
       "path": "tsconfig.json",
-      "accessCount": 1,
-      "lastAccessed": 1781720386965,
+      "accessCount": 2,
+      "lastAccessed": 1781753375876,
       "type": "file"
     },
     {
@@ -279,9 +285,75 @@
       "type": "file"
     },
     {
-      "path": "src/lib/round-trip.test.ts",
+      "path": "worker/package.json",
       "accessCount": 1,
-      "lastAccessed": 1781739004069,
+      "lastAccessed": 1781752904788,
+      "type": "file"
+    },
+    {
+      "path": "worker/tsconfig.json",
+      "accessCount": 1,
+      "lastAccessed": 1781752925516,
+      "type": "file"
+    },
+    {
+      "path": "worker/wrangler.toml.example",
+      "accessCount": 1,
+      "lastAccessed": 1781752933257,
+      "type": "file"
+    },
+    {
+      "path": "worker/src/prompt.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781752974559,
+      "type": "file"
+    },
+    {
+      "path": "worker/src/outline.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781753058548,
+      "type": "file"
+    },
+    {
+      "path": "worker/src/llm.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781753091095,
+      "type": "file"
+    },
+    {
+      "path": "worker/src/ratelimit.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781753162654,
+      "type": "file"
+    },
+    {
+      "path": "worker/src/index.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781753278559,
+      "type": "file"
+    },
+    {
+      "path": "worker/tests/worker.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781753308464,
+      "type": "file"
+    },
+    {
+      "path": "worker/vitest.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1781753328251,
+      "type": "file"
+    },
+    {
+      "path": "worker/DEPLOY.md",
+      "accessCount": 1,
+      "lastAccessed": 1781753868049,
+      "type": "file"
+    },
+    {
+      "path": "worker/wrangler.toml",
+      "accessCount": 1,
+      "lastAccessed": 1781754607167,
       "type": "file"
     }
   ],
