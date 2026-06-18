@@ -47,6 +47,34 @@ make ci              # lint + test + build（CI 等效）
 - [NEVER] 把 `public/client-converter.js` 或手動 `?v=` 快取戳記加回來（converter 已併入 Vite 模組圖，自動 content-hash）。
 - [ALWAYS] 修改 SW（`src/sw.ts`）後，記得更新體驗：`clients.claim` + `Layout.astro` 的 update toast 已就位。
 
+## ⚠️ 佈版必要設定（每次改動/部署/被問「上線」時，MUST 逐條檢查）
+
+> 詳細 runbook 見 aigoez repo `docs/UPDATE-TOOL-RUNBOOK.md`。以下是不可漏的必要設定。
+
+**正式站 = `https://aigoez.com/xmind-markdown/`（不是 gh-pages）。** gh-pages 只是備援/預覽；aigoez 才是正式。工具改動 commit 在**本 repo**，正式上線靠 aigoez 端的同步部署（見下）。
+
+**改完工具後，正式部署在「aigoez repo」做，不是這裡：**
+```bash
+cd /home/peter/Code/SEO-SITE/aigoez
+git checkout main            # MUST 在 main（正式分支），否則只上 preview
+make deploy                  # sync 工具(build) → build aigoez → 推 Cloudflare
+```
+> 本 repo 不需要為了「上線 aigoez」而部署；aigoez 的 `make xmind-sync` 會自己 `cd` 來這裡 `npm run build`。
+
+**每次佈版前 MUST 確認的 6 個設定（任一跑掉就壞）：**
+| # | 設定 | 位置 | 跑掉的後果 |
+|---|---|---|---|
+| 1 | `base: '/xmind-markdown/'`（含尾斜線） | `astro.config.mjs` | 掛 aigoez 後 asset 路徑全錯、白屏 |
+| 2 | worker CORS 含 `https://aigoez.com` + `https://www.aigoez.com` | `worker/wrangler.toml` 的 `ALLOWED_ORIGINS` | AI Help 從 aigoez 用 → 403 |
+| 3 | worker 有改動 → `cd worker && wrangler deploy`（否則線上 worker 還是舊的） | — | AI 行為/錯誤處理沒上線 |
+| 4 | AI endpoint 不動：`AI_API_URL` = `https://xmind-markdown-ai.murmurnoteapp.workers.dev` | `src/lib/ai-config.ts` | AI Help 壞 |
+| 5 | 工具列連結是 root 絕對路徑 `/xmind-to-markdown/` 等（不可被 base 前綴化） | `src/layouts/Layout.astro` | 導航連到 `/xmind-markdown/xmind-to-markdown/` → 404 |
+| 6 | 品牌＝「AI GoEZ」+「XMind 8 相容」 | Header/Hero/Footer/manifests | 品牌不一致 |
+
+**commit 邊界（MUST）：** 工具 UI/邏輯/CSS/AI client/worker → commit 在**本 repo**；aigoez 內容頁/Navbar/SEO/Makefile → aigoez repo；工具 build 產物（`public/xmind-markdown/`）→ **永不 commit**（gitignore，部署時重建）。
+
+**PWA 卡舊版：** 驗收用無痕視窗或 DevTools→Application→Unregister SW（舊 SW precache 會擋新版）。
+
 
 ## Dev Brain (Development Experience Database)
 
